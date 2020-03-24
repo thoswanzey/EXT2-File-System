@@ -19,6 +19,8 @@ MINODE *root;
 
 PROC   proc[NPROC], *running;
 
+char *disk = "diskimage"; // virtual disk
+
 char gpath[128]; // global for tokenized components
 char *name[32];  // assume at most 32 components in pathname
 int   n;         // number of component strings
@@ -104,8 +106,28 @@ int ialloc(int dev)
   return 0;
 }
 
+int balloc(int dev)
+{
+  int icount = 0;
+  char buf[BLKSIZE];
 
-char *disk = "diskimage";
+  icount = sp->s_blocks_count;
+
+  get_block(dev, gp->bg_block_bitmap, (char*)&buf);
+
+  for(int i = 0; i < icount; i++)
+  {
+    if(!tstbit((char*)&buf, i))
+    {
+      set_bit((char*)&buf, i);
+      put_block(dev, gp->bg_block_bitmap, (char*)&buf);
+      return i+1;
+    }
+  }
+
+
+}
+
 int main(int argc, char *argv[ ])
 {
   int ino;
