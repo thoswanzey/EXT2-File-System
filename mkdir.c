@@ -85,15 +85,15 @@ int mymkdir(MINODE *pip, char *child)
   dp = (DIR*)buf;
 
   dp->inode = ino;
-  strcpy(dp->name, ".");
+  dp->name[0] = '.';
   dp->name_len = strlen(".");
   dp->rec_len = 12;
 
   dp = (DIR *)((char *)dp + dp->rec_len);//Move to next entry
 
   dp->inode = pip->ino;
-  strcpy(dp->name, ".");
-  dp->name_len = strlen(".");
+  dp->name[0] = dp->name[1] = '.';
+  dp->name_len = strlen("..");
   dp->rec_len = 1012;//Rest of block
 
   put_block(dev, bno, buf);//Write block back to disk
