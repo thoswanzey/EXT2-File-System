@@ -143,16 +143,58 @@ int balloc(int dev) {
 
   get_block(dev, gp->bg_block_bitmap, (char *)&buf);
 
-  for (int i = 0; i < icount; i++) {
-    if (!tstbit((char *)&buf, i)) {
-      set_bit((char *)&buf, i);
-      put_block(dev, gp->bg_block_bitmap, (char *)&buf);
-      return i + 1;
+  for(int i = 0; i < icount; i++)
+  {
+    if(!tst_bit((char*)&buf, i))
+    {
+      set_bit((char*)&buf, i);
+      put_block(dev, gp->bg_block_bitmap, (char*)&buf);
+      return i+1;
     }
   }
 }
 
-int main(int argc, char *argv[]) {
+int mymkdir(MINODE *pip, char *child)
+{
+  
+  return 0;
+}
+
+int make_dir(char *path) 
+{ 
+  char buf[128], parent[128], child[128], temp[128];
+  MINODE *pip; 
+
+
+  strcpy(buf, path);
+
+  if(buf[0] == '/')
+    dev = root->dev;
+  else
+    dev = running->cwd->dev;
+
+  strcpy(temp, buf);
+  strcpy(parent, dirname(temp)); // dirname destroys path
+
+  strcpy(temp, buf);
+  strcpy(child, basename(temp)); // basename destroys path
+
+  int ino;
+  ino = getino(parent);
+  pip = iget(dev, ino);
+
+  mymkdir(pip, child);
+
+  pip->refCount++;
+  pip->dirty = 1;
+
+  iput(pip);
+
+  return 0;
+}
+
+int main(int argc, char *argv[ ])
+{
   int ino;
   char buf[BLKSIZE];
   char line[128], cmd[32], pathname[128];
