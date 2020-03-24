@@ -2,6 +2,7 @@
 
 extern int dev;
 extern MINODE *root;
+extern PROC *running;
 
 int ch_dir(char *pathname)   
 {
@@ -145,7 +146,7 @@ char *pwd(MINODE *wd)
 
   if (wd == root){
     printf("/");
-    return;
+    return 0;
   }
 
   int parent_ino, my_ino;

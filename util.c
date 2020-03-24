@@ -1,4 +1,12 @@
 /*********** util.c file ****************/
+extern int  dev;
+extern char gpath[128];
+extern char *name[32];
+extern int n;
+extern PROC *running;;
+extern MINODE minode[NMINODE];
+extern MINODE *root;
+extern int inode_start;
 
 int get_block(int dev, int blk, char *buf)
 {
