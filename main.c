@@ -69,9 +69,31 @@ int balloc(int dev) {
 
 int mymkdir(MINODE *pip, char *child)
 {
+  MINODE *mip;
+  char buf[BLKSIZE];
   int ino = ialloc(dev);
   int bno = balloc(dev);
   printf("ino: %d\nbno: %d\n", ino, bno);
+
+  mip = iget(dev,ino);
+  INODE *ip = &mip->INODE;
+
+  ip->i_mode = 0x41ED;		// OR 040755: DIR type and permissions
+  ip->i_uid  = running->uid;	// Owner uid 
+  ip->i_gid  = running->gid;	// Group Id
+  ip->i_size = BLKSIZE;		// Size in bytes 
+  ip->i_links_count = 2;	        // Links count=2 because of . and ..
+  ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
+  ip->i_blocks = 2;                	// LINUX: Blocks count in 512-byte chunks 
+  ip->i_block[0] = bno;             // new DIR has one data block
+  for(int i = 1; i<15;i++)
+  {
+    ip->i_block[i] = 0;
+  }
+  
+  mip->dirty = 1;               // mark minode dirty
+  iput(mip);                    // write INODE to disk
+
   return 0;
 }
 
@@ -130,7 +152,6 @@ int init()
   printf("init()\n");
 
   for (i=0; i<NMINODE; i++){
-  }
     mip = &minode[i];
     mip->dev = mip->ino = 0;
     mip->refCount = 0;
