@@ -51,25 +51,27 @@ int ialloc(int dev) {
 }
 
 int balloc(int dev) {
-  int icount = 0;
+  int bcount = 0;
   char buf[BLKSIZE];
 
-  icount = sp->s_blocks_count;
+  bcount = sp->s_blocks_count;
 
-  get_block(dev, gp->bg_block_bitmap, (char *)&buf);
+  get_block(dev, gp->bg_block_bitmap, buf);
 
-  for (int i = 0; i < icount; i++) {
-    if (!tst_bit((char *)&buf, i)) {
-      set_bit((char *)&buf, i);
-      put_block(dev, gp->bg_block_bitmap, (char *)&buf);
-      return i + 1;
+  for (int i = 0; i < bcount; i++) {
+    if (!tst_bit(buf, i)) {
+      set_bit(buf, i);
+      put_block(dev, gp->bg_block_bitmap, buf);
+      return i;
     }
   }
 }
 
 int mymkdir(MINODE *pip, char *child)
 {
-  
+  int ino = ialloc(dev);
+  int bno = balloc(dev);
+  printf("ino: %d\nbno: %d\n", ino, bno);
   return 0;
 }
 
@@ -128,6 +130,7 @@ int init()
   printf("init()\n");
 
   for (i=0; i<NMINODE; i++){
+  }
     mip = &minode[i];
     mip->dev = mip->ino = 0;
     mip->refCount = 0;
