@@ -67,9 +67,17 @@ int balloc(int dev) {
   }
 }
 
+
+int enter_name(MINODE *pip, int myino, char *myname){
+
+
+}
+
+
 int mymkdir(MINODE *pip, char *child)
 {
   MINODE *mip;
+  DIR *dp;
   char buf[BLKSIZE];
   int ino = ialloc(dev);
   int bno = balloc(dev);
@@ -90,10 +98,28 @@ int mymkdir(MINODE *pip, char *child)
   {
     ip->i_block[i] = 0;
   }
-  
+
   mip->dirty = 1;               // mark minode dirty
   iput(mip);                    // write INODE to disk
 
+  get_block(dev, bno, buf);//Read block from disk
+  dp = (DIR*)buf;
+
+  dp->inode = ino;
+  strcpy(dp->name, ".");
+  dp->name_len = strlen(".");
+  dp->rec_len = 12;
+
+  dp = (DIR *)((char *)dp + dp->rec_len);//Move to next entry
+
+  dp->inode = pip->ino;
+  strcpy(dp->name, ".");
+  dp->name_len = strlen(".");
+  dp->rec_len = 1012;//Rest of block
+
+  put_block(dev, bno, buf);//Write block back to disk
+  enter_name(pip, ino, child);
+  
   return 0;
 }
 
