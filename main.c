@@ -97,9 +97,21 @@ int make_dir(char *path)
   ino = getino(parent);
   pip = iget(dev, ino);
 
+  if(!S_ISDIR(pip->INODE.i_mode))
+  {
+    printf("ERROR - Filepath does not point to a directory\n");
+    return -1;
+  }
+
+  if(getino(path)){
+    printf("ERROR - Directory already exists\n");
+    return -2;
+  }
+
   mymkdir(pip, child);
 
-  pip->refCount++;
+  pip->INODE.i_links_count++;
+  pip->INODE.i_atime = time(NULL);
   pip->dirty = 1;
 
   iput(pip);
