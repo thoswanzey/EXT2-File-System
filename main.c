@@ -73,6 +73,37 @@ int quit()
   exit(0);
 }
 
+int tst_bit(char *buf, int bit)
+{
+  return buf[bit/8] & (1 << (bit % 8));
+}
+
+int set_bit(char *buf, int bit)
+{
+  buf[bit/8] |= (1 << (bit & 8));
+}
+
+int ialloc(int dev)
+{
+  int i;
+  char buf[BLKSIZE];
+
+  get_block(dev, imap, buf);
+
+  for (i = 0; i < ninodes; i++)
+  {
+    if(tst_bit(buf, i)==0)
+    {
+      set_bit(buf, i);
+      put_block(dev, imap, buf);
+      printf("allocated ino = %d\n", i+1);
+      return i+1;
+    }
+  }
+
+  return 0;
+}
+
 
 char *disk = "diskimage";
 int main(int argc, char *argv[ ])
