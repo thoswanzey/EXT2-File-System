@@ -1,13 +1,13 @@
 /************* mkdir.c file **************/
 extern char gpath[128];
-extern int n, dev, ninodes, imap;
+extern int n, dev, ninodes, nblocks, imap, bmap;
 extern PROC *running;
 
 
 int tst_bit(char *buf, int bit) { return buf[bit / 8] & (1 << (bit % 8)); }
 
 
-int set_bit(char *buf, int bit) { buf[bit / 8] |= (1 << (bit & 8)); }
+int set_bit(char *buf, int bit) { buf[bit / 8] |= (1 << (bit % 8)); }
 
 
 int ialloc(int dev) {
@@ -24,26 +24,26 @@ int ialloc(int dev) {
       return i + 1;
     }
   }
-
+  printf("ERROR - inode was not allocated because no free inodes remain\n");
   return 0;
 }
 
 
 int balloc(int dev) {
-  int bcount = 0;
   char buf[BLKSIZE];
 
-  bcount = sp->s_blocks_count;
+  get_block(dev, bmap, buf);
 
-  get_block(dev, gp->bg_block_bitmap, buf);
-
-  for (int i = 0; i < bcount; i++) {
+  for (int i = 0; i < nblocks; i++) {
     if (!tst_bit(buf, i)) {
       set_bit(buf, i);
-      put_block(dev, gp->bg_block_bitmap, buf);
+      put_block(dev, bmap, buf);
+      printf("allocated bno = %d\n", i);
       return i;
     }
   }
+  printf("ERROR - Block was not allocated because no free blocks remain\n");
+  return -1;
 }
 
 
@@ -63,7 +63,6 @@ int enter_name(MINODE *pip, int myino, char *myname){
 
     pblk = iparent->i_block[i]; // get current block number
 
-    ideal_length = 4 * ((8 + dp->name_len + 3)/4); // length until next directory entry
     need_length = 4 * ((8 + strlen(myname) + 3)/4); // needed length of new dir name in bytes
 
     printf("ideal = %d\nneed = %d\n", ideal_length, need_length);
@@ -80,7 +79,9 @@ int enter_name(MINODE *pip, int myino, char *myname){
       cp += dp->rec_len;
       dp = (DIR *)cp; // dp now points at last entry in block
     }
-    
+
+    ideal_length = 4 * ((8 + dp->name_len + 3)/4); // length until next directory entry
+
     cp = (char*)dp;
 
     remain = dp->rec_len - ideal_length; // remaining length
@@ -143,14 +144,12 @@ int enter_name(MINODE *pip, int myino, char *myname){
 
 int mymkdir(MINODE *pip, char *child)
 {
-  MINODE *mip;
   DIR *dp;
   char buf[BLKSIZE];
   int ino = ialloc(dev);
   int bno = balloc(dev);
-  printf("ino: %d\nbno: %d\n", ino, bno);
 
-  mip = iget(dev,ino);
+  MINODE *mip = iget(dev,ino);
   INODE *ip = &mip->INODE;
 
   ip->i_mode = 0x41ED;		// OR 040755: DIR type and permissions
@@ -198,11 +197,6 @@ int make_dir(char *path)
 
   strcpy(buf, path);
 
-  if(buf[0] == '/')
-    dev = root->dev;
-  else
-    dev = running->cwd->dev;
-
   strcpy(temp, buf);
   strcpy(parent, dirname(temp)); // dirname destroys path
 
@@ -214,15 +208,21 @@ int make_dir(char *path)
   ino = getino(parent);
   pip = iget(dev, ino);
 
+
+  if(!pip){
+    printf("ERROR - Provided parent directory does exists!\n");
+    return -1;
+  }
+
   if(!S_ISDIR(pip->INODE.i_mode))
   {
     printf("ERROR - Filepath does not point to a directory\n");
-    return -1;
+    return -2;
   }
 
   if(getino(path)){
     printf("ERROR - Directory already exists\n");
-    return -2;
+    return -3;
   }
 
   mymkdir(pip, child);
