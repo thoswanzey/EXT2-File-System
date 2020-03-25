@@ -12,6 +12,10 @@
 #include <time.h>
 
 #include "type.h"
+#include "util.c"
+#include "cd_ls_pwd.c"
+#include "mkdir.c"
+#include "creat.c"
 
 // global variables
 MINODE minode[NMINODE];
@@ -25,87 +29,7 @@ int   n;         // number of component strings
 
 int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start; // disk parameters
-#include "util.c"
-#include "cd_ls_pwd.c"
 
-int tst_bit(char *buf, int bit) { return buf[bit / 8] & (1 << (bit % 8)); }
-
-int set_bit(char *buf, int bit) { buf[bit / 8] |= (1 << (bit & 8)); }
-
-int ialloc(int dev) {
-  int i;
-  char buf[BLKSIZE];
-
-  get_block(dev, imap, buf);
-
-  for (i = 0; i < ninodes; i++) {
-    if (tst_bit(buf, i) == 0) {
-      set_bit(buf, i);
-      put_block(dev, imap, buf);
-      printf("allocated ino = %d\n", i + 1);
-      return i + 1;
-    }
-  }
-
-  return 0;
-}
-
-int balloc(int dev) {
-  int icount = 0;
-  char buf[BLKSIZE];
-
-  icount = sp->s_blocks_count;
-
-  get_block(dev, gp->bg_block_bitmap, (char *)&buf);
-
-  for (int i = 0; i < icount; i++) {
-    if (!tst_bit((char *)&buf, i)) {
-      set_bit((char *)&buf, i);
-      put_block(dev, gp->bg_block_bitmap, (char *)&buf);
-      return i + 1;
-    }
-  }
-}
-
-int mymkdir(MINODE *pip, char *child)
-{
-  
-  return 0;
-}
-
-int make_dir(char *path) 
-{ 
-  char buf[128], parent[128], child[128], temp[128];
-  MINODE *pip; 
-
-
-  strcpy(buf, path);
-
-  if(buf[0] == '/')
-    dev = root->dev;
-  else
-    dev = running->cwd->dev;
-
-  strcpy(temp, buf);
-  strcpy(parent, dirname(temp)); // dirname destroys path
-
-  strcpy(temp, buf);
-  strcpy(child, basename(temp)); // basename destroys path
-
-  int ino;
-
-  ino = getino(parent);
-  pip = iget(dev, ino);
-
-  mymkdir(pip, child);
-
-  pip->refCount++;
-  pip->dirty = 1;
-
-  iput(pip);
-
-  return 0;
-}
 
 int init()
 {
