@@ -48,8 +48,96 @@ int balloc(int dev) {
 
 
 int enter_name(MINODE *pip, int myino, char *myname){
+  char buf[BLKSIZE], *cp;
+  DIR *dp;
 
+  INODE *iparent = &pip->INODE; // get parent inode
 
+  int pblk = 0, remain = 0;
+  int ideal_length = 0, need_length = 0;
+
+  for(int i = 0; i < (iparent->i_size / BLKSIZE); i++)
+  {
+    if(iparent->i_block[i]==0)
+      break;
+
+    pblk = iparent->i_block[i]; // get current block number
+
+    ideal_length = 4 * ((8 + dp->name_len + 3)/4); // length until next directory entry
+    need_length = 4 * ((8 + strlen(myname) + 3)/4); // needed length of new dir name in bytes
+
+    printf("ideal = %d\nneed = %d\n", ideal_length, need_length);
+
+    get_block(dev, pblk, buf); // get current parent inode block
+
+    dp = (DIR*)buf; // cast current inode block as directory pointer
+    cp = buf;
+
+    printf("Entering last entry in data block %d\n", pblk);
+
+    while((cp + dp->rec_len) < (buf + BLKSIZE))
+    {
+      cp += dp->rec_len;
+      dp = (DIR *)cp; // dp now points at last entry in block
+    }
+    
+    cp = (char*)dp;
+
+    remain = dp->rec_len - ideal_length; // remaining length
+    printf("remain = %d\n", remain);
+
+    if(remain >= need_length)
+    {
+      dp->rec_len = ideal_length;
+
+      cp += dp->rec_len; // set cp to end of ideal
+      dp = (DIR*)cp; // end of last entry
+
+      dp->inode = myino; // set end of entry to provided inode
+
+      dp->rec_len = BLKSIZE - ((u32)cp - (u32)buf);
+
+      dp->name_len = strlen(myname);
+
+      dp->file_type = EXT2_FT_DIR;
+
+      strcpy(dp->name, myname);
+
+      put_block(dev, pblk, buf); // write block back
+
+      return 1;
+    }
+
+    printf("Block number = %d\n", i);
+
+    pblk = balloc(dev); // get the first available block for new inode
+
+    iparent->i_block[i] = pblk;
+
+    iparent->i_size += BLKSIZE;
+    pip->dirty = 1;
+
+    get_block(dev, pblk, buf);
+
+    cp = (DIR*)buf;
+    cp = buf;
+
+    printf("Directory Name = %s\n", dp->name);
+
+    dp->inode = myino;
+
+    dp->rec_len = BLKSIZE;
+
+    dp->name_len = strlen(myname);
+
+    dp->file_type = EXT2_FT_DIR;
+
+    strcpy(dp->name, myname);
+
+    put_block(dev, pblk, buf); // write block
+
+    return 1;
+  }
 }
 
 
