@@ -1,1 +1,89 @@
 /************* creat.c file **************/
+
+extern char gpath[128];
+extern int n, dev, ninodes, imap;
+extern PROC *running;
+
+
+int my_creat(MINODE *pip, char *child)
+{
+  MINODE *mip;
+  DIR *dp;
+  char buf[BLKSIZE];
+  int ino = ialloc(dev);
+  int bno = balloc(dev);
+  printf("ino: %d\nbno: %d\n", ino, bno);
+
+  mip = iget(dev,ino);
+  INODE *ip = &mip->INODE;
+
+  ip->i_mode = 0x81A4;		// OR 0100644: File type and permissions
+  ip->i_uid  = running->uid;	// Owner uid 
+  ip->i_gid  = running->gid;	// Group Id
+  ip->i_size = 0;
+  ip->i_links_count = 1;	        
+  ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
+  ip->i_blocks = 2;                	// LINUX: Blocks count in 512-byte chunks 
+  ip->i_block[0] = bno;             // new DIR has one data block
+  for(int i = 1; i<15;i++)
+  {
+    ip->i_block[i] = 0;
+  }
+
+  mip->dirty = 1;               // mark minode dirty
+  iput(mip);                    // write INODE to disk
+
+  enter_name(pip, ino, child);
+  
+  return 0;
+}
+
+int create_file(char *path) 
+{ 
+  char buf[128], parent[128], child[128], temp[128];
+  MINODE *pip; 
+
+
+  strcpy(buf, path);
+
+  if(buf[0] == '/')
+    dev = root->dev;
+  else
+    dev = running->cwd->dev;
+
+  strcpy(temp, buf);
+  strcpy(parent, dirname(temp)); // dirname destroys path
+
+  strcpy(temp, buf);
+  strcpy(child, basename(temp)); // basename destroys path
+
+  int ino;
+
+  ino = getino(parent);
+  pip = iget(dev, ino);
+
+  if(!pip){
+    printf("ERROR - File already exists!\n");
+    return -1;
+  }
+
+  if(!S_ISDIR(pip->INODE.i_mode))
+  {
+    printf("ERROR - Provided parent directory is not a directory!\n");
+    return -2;
+  }
+
+  if(getino(path)){
+    printf("ERROR - Directory already exists!\n");
+    return -3;
+  }
+
+  mymkdir(pip, child);
+
+  pip->INODE.i_atime = time(NULL);
+  pip->dirty = 1;
+
+  iput(pip);
+
+  return 0;
+}
