@@ -7,14 +7,10 @@ extern PROC *running;
 
 int my_creat(MINODE *pip, char *child)
 {
-  MINODE *mip;
   DIR *dp;
-  char buf[BLKSIZE];
   int ino = ialloc(dev);
-  int bno = balloc(dev);
-  printf("ino: %d\nbno: %d\n", ino, bno);
 
-  mip = iget(dev,ino);
+  MINODE *mip = iget(dev,ino);
   INODE *ip = &mip->INODE;
 
   ip->i_mode = 0x81A4;		// OR 0100644: File type and permissions
@@ -23,9 +19,8 @@ int my_creat(MINODE *pip, char *child)
   ip->i_size = 0;
   ip->i_links_count = 1;	        
   ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);  // set to current time
-  ip->i_blocks = 2;                	// LINUX: Blocks count in 512-byte chunks 
-  ip->i_block[0] = bno;             // new DIR has one data block
-  for(int i = 1; i<15;i++)
+  ip->i_blocks = 0;                	// LINUX: Blocks count in 512-byte chunks
+  for(int i = 0; i<15;i++)
   {
     ip->i_block[i] = 0;
   }
@@ -46,11 +41,6 @@ int create_file(char *path)
 
   strcpy(buf, path);
 
-  if(buf[0] == '/')
-    dev = root->dev;
-  else
-    dev = running->cwd->dev;
-
   strcpy(temp, buf);
   strcpy(parent, dirname(temp)); // dirname destroys path
 
@@ -63,7 +53,7 @@ int create_file(char *path)
   pip = iget(dev, ino);
 
   if(!pip){
-    printf("ERROR - File already exists!\n");
+    printf("ERROR - Provided parent directory does exists!\n");
     return -1;
   }
 
@@ -74,11 +64,11 @@ int create_file(char *path)
   }
 
   if(getino(path)){
-    printf("ERROR - Directory already exists!\n");
+    printf("ERROR - File already exists!\n");
     return -3;
   }
 
-  mymkdir(pip, child);
+  my_creat(pip, child);
 
   pip->INODE.i_atime = time(NULL);
   pip->dirty = 1;

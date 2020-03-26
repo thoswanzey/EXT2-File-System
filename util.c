@@ -85,25 +85,30 @@ MINODE *iget(int dev, int ino)
 
 void iput(MINODE *mip)
 {
- int i, block, offset;
+ int ino, block, offset;
  char buf[BLKSIZE];
  INODE *ip;
 
  mip->refCount--;
- 
+
  if (mip->refCount > 0)  // minode is still in use
     return;
  if (!mip->dirty)        // INODE has not changed; no need to write back
     return;
- 
- /* write INODE back to disk */
- /***** NOTE *******************************************
-  For mountroot, we never MODIFY any loaded INODE
-                 so no need to write it back
-  FOR LATER WROK: MUST write INODE back to disk if refCount==0 && DIRTY
 
-  Write YOUR code here to write INODE back to disk
- ********************************************************/
+ ino = mip->ino;
+ block = (ino-1) / 8 + inode_start;
+ offset = (ino-1) % 8;
+ get_block(mip->dev, block, buf);
+
+ ip = (INODE*)buf + offset;
+ memcpy(ip, &mip->INODE, sizeof(INODE));
+
+ put_block(mip->dev, block, buf);
+
+ //Modifications have been saved, so no longer dirty
+ mip->dirty = 0;
+ 
 } 
 
 int search(MINODE *mip, char *name)
