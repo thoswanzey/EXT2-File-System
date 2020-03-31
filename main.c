@@ -16,6 +16,9 @@
 #include "cd_ls_pwd.c"
 #include "mkdir.c"
 #include "creat.c"
+#include "rmdir.c"
+#include "unlink.c"
+
 
 // global variables
 MINODE minode[NMINODE];
