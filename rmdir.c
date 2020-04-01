@@ -1,4 +1,4 @@
-/************* mkdir.c file **************/
+/************* rmdir.c file **************/
 
 void clr_bit(char *buf, int bit){buf[bit/8] &= ~(1 << (bit % 8));}
 

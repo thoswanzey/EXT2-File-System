@@ -18,7 +18,7 @@
 #include "creat.c"
 #include "rmdir.c"
 #include "unlink.c"
-
+#include "link.c"
 
 // global variables
 MINODE minode[NMINODE];
@@ -85,7 +85,7 @@ int main(int argc, char *argv[ ])
 {
   int ino;
   char buf[BLKSIZE];
-  char line[128], cmd[32], pathname[128];
+  char line[128], cmd[32], pathname[128], pathname_2[128];
  
   printf("checking EXT2 FS ....");
   if ((fd = open(disk, O_RDWR)) < 0){
@@ -128,16 +128,17 @@ int main(int argc, char *argv[ ])
   // WRTIE code here to create P1 as a USER process
   
   while(1){
-    printf("\ninput command : [ls|cd|pwd|quit|mkdir|create] ");
+    printf("\ninput command : [ls|cd|pwd|quit|mkdir|create|link|unlink] ");
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
 
     if (line[0]==0)
        continue;
     pathname[0] = 0;
+    pathname_2[0] = 0;
 
-    sscanf(line, "%s %s", cmd, pathname);
-    printf("cmd=%s pathname=%s\n", cmd, pathname);
+    sscanf(line, "%s %s %s", cmd, pathname, pathname_2);
+    printf("cmd=%s pathname=%s pathname2=%s\n", cmd, pathname, pathname_2);
   
     if (strcmp(cmd, "ls")==0)
        ls(pathname);
@@ -153,7 +154,9 @@ int main(int argc, char *argv[ ])
        create_file(pathname);
     else if (strcmp(cmd, "rmdir")==0)
        my_rmdir(pathname);
-    else if (strcmp(cmd, "unlink")==0)
+   else if (strcmp(cmd, "link")==0)
+       my_link(pathname, pathname_2);
+    else if (strcmp(cmd, "unlink")==0) 
        create_file(pathname);
     else
        printf("Invalid Command!\n");
