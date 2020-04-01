@@ -16,6 +16,9 @@
 #include "cd_ls_pwd.c"
 #include "mkdir.c"
 #include "creat.c"
+#include "rmdir.c"
+#include "unlink.c"
+
 
 // global variables
 MINODE minode[NMINODE];
@@ -147,6 +150,10 @@ int main(int argc, char *argv[ ])
     else if (strcmp(cmd, "mkdir")==0)
        make_dir(pathname);
     else if (strcmp(cmd, "create")==0)
+       create_file(pathname);
+    else if (strcmp(cmd, "rmdir")==0)
+       my_rmdir(pathname);
+    else if (strcmp(cmd, "unlink")==0)
        create_file(pathname);
     else
        printf("Invalid Command!\n");
