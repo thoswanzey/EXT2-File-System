@@ -151,6 +151,10 @@ int main(int argc, char *argv[ ])
        make_dir(pathname);
     else if (strcmp(cmd, "create")==0)
        create_file(pathname);
+    else if (strcmp(cmd, "rmdir")==0)
+       my_rmdir(pathname);
+    else if (strcmp(cmd, "unlink")==0)
+       create_file(pathname);
     else
        printf("Invalid Command!\n");
   }
