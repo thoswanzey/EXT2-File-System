@@ -19,6 +19,8 @@
 #include "creat.c"
 #include "rmdir.c"
 #include "link.c"
+#include "unlink.c"
+#include "symlink.c"
 
 // global variables
 MINODE minode[NMINODE];
@@ -128,7 +130,7 @@ int main(int argc, char *argv[ ])
   // WRTIE code here to create P1 as a USER process
   
   while(1){
-    printf("\ninput command : [ls|cd|pwd|quit|mkdir|create|link|unlink] ");
+    printf("\ninput command : [ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink] ");
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
 
@@ -154,10 +156,12 @@ int main(int argc, char *argv[ ])
        create_file(pathname);
     else if (strcmp(cmd, "rmdir")==0)
        my_rmdir(pathname);
-   else if (strcmp(cmd, "link")==0)
+    else if (strcmp(cmd, "link")==0)
        my_link(pathname, pathname_2);
     else if (strcmp(cmd, "unlink")==0) 
        my_unlink(pathname);
+    else if (strcmp(cmd, "symlink")==0) 
+       my_symlink(pathname, pathname_2);
     else
        printf("Invalid Command!\n");
   }

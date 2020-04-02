@@ -3,55 +3,11 @@ extern char gpath[128];
 extern int n, dev, ninodes, nblocks, imap, bmap;
 extern PROC *running;
 
-
-int tst_bit(char *buf, int bit) { return buf[bit / 8] & (1 << (bit % 8)); }
-
-
-int set_bit(char *buf, int bit) { buf[bit / 8] |= (1 << (bit % 8)); }
-
-
-int ialloc(int dev) {
-  int i;
-  char buf[BLKSIZE];
-
-  get_block(dev, imap, buf);
-
-  for (i = 0; i < ninodes; i++) {
-    if (tst_bit(buf, i) == 0) {
-      set_bit(buf, i);
-      put_block(dev, imap, buf);
-      printf("allocated ino = %d\n", i + 1);
-      return i + 1;
-    }
-  }
-  printf("ERROR - inode was not allocated because no free inodes remain\n");
-  return 0;
-}
-
-
-int balloc(int dev) {
-  char buf[BLKSIZE];
-
-  get_block(dev, bmap, buf);
-
-  for (int i = 0; i < nblocks; i++) {
-    if (!tst_bit(buf, i)) {
-      set_bit(buf, i);
-      put_block(dev, bmap, buf);
-      printf("allocated bno = %d\n", i);
-      return i;
-    }
-  }
-  printf("ERROR - Block was not allocated because no free blocks remain\n");
-  return -1;
-}
-
-
-int enter_name(MINODE *pip, int myino, char *myname){
+int enter_name(MINODE *pmip, int myino, char *myname){
   char buf[BLKSIZE], *cp;
   DIR *dp;
 
-  INODE *iparent = &pip->INODE; // get parent inode
+  INODE *iparent = &pmip->INODE; // get parent inode
 
   int pblk = 0, remain = 0;
   int ideal_length = 0, need_length = 0;
@@ -95,18 +51,15 @@ int enter_name(MINODE *pip, int myino, char *myname){
       dp = (DIR*)cp; // end of last entry
 
       dp->inode = myino; // set end of entry to provided inode
-
       dp->rec_len = BLKSIZE - ((u32)cp - (u32)buf);
-
       dp->name_len = strlen(myname);
-
       dp->file_type = EXT2_FT_DIR;
 
       strcpy(dp->name, myname);
 
       put_block(dev, pblk, buf); // write block back
 
-      return 1;
+      return 0;
     }
 
     printf("Block number = %d\n", i);
@@ -116,7 +69,7 @@ int enter_name(MINODE *pip, int myino, char *myname){
     iparent->i_block[i] = pblk;
 
     iparent->i_size += BLKSIZE;
-    pip->dirty = 1;
+    pmip->dirty = 1;
 
     get_block(dev, pblk, buf);
 
@@ -126,23 +79,20 @@ int enter_name(MINODE *pip, int myino, char *myname){
     printf("Directory Name = %s\n", dp->name);
 
     dp->inode = myino;
-
     dp->rec_len = BLKSIZE;
-
     dp->name_len = strlen(myname);
-
     dp->file_type = EXT2_FT_DIR;
 
     strcpy(dp->name, myname);
 
     put_block(dev, pblk, buf); // write block
 
-    return 1;
+    return 0;
   }
 }
 
 
-int mymkdir(MINODE *pip, char *child)
+int my_mkdir(MINODE *pip, char *child)
 {
   DIR *dp;
   char buf[BLKSIZE];
@@ -225,7 +175,7 @@ int make_dir(char *path)
     return -3;
   }
 
-  mymkdir(pip, child);
+  my_mkdir(pip, child);
 
   pip->INODE.i_links_count++;
   pip->INODE.i_atime = time(NULL);
