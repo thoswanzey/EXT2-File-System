@@ -12,12 +12,12 @@
 #include <time.h>
 
 #include "type.h"
+#include "alloc.c"
 #include "util.c"
 #include "cd_ls_pwd.c"
 #include "mkdir.c"
 #include "creat.c"
 #include "rmdir.c"
-#include "unlink.c"
 #include "link.c"
 
 // global variables
@@ -157,7 +157,7 @@ int main(int argc, char *argv[ ])
    else if (strcmp(cmd, "link")==0)
        my_link(pathname, pathname_2);
     else if (strcmp(cmd, "unlink")==0) 
-       create_file(pathname);
+       my_unlink(pathname);
     else
        printf("Invalid Command!\n");
   }

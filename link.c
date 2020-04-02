@@ -8,20 +8,28 @@ int my_link(char *old_file, char *new_file)
 {
     char newbuf[128], parent[128], child[128], temp[128];
 
-    int pino, oino; 
-    MINODE *pmip, *omip;
+    int pino, ino; 
+    MINODE *pmip, *mip;
+	INODE *pip, *ip;
 
-    oino = getino(old_file);
-    omip = iget(dev, oino);
+    ino = getino(old_file);
+    mip = iget(dev, ino);
 
-    if(S_ISDIR(omip->INODE.i_mode))
+    ip = &mip->INODE;
+    pip = &mip->INODE;
+
+    if(S_ISDIR(ip->i_mode))
     {
         printf("ERROR: File provided is a directory.\n");
+
+        return -1;
     }
 
     if(getino(new_file) != 0)
     {
         printf("ERROR: New link must not exist.\n");
+
+        return -2;
     }
 
     strcpy(newbuf, new_file);
@@ -35,15 +43,75 @@ int my_link(char *old_file, char *new_file)
     pino = getino(parent);
     pmip = iget(dev, pino);
 
-    enter_name(pmip, oino, child); // add hard link entry
+    enter_name(pmip, ino, child); // add hard link entry
+    printf("INODE: %d, links_count: %d\n", mip->ino, ip->i_links_count);
 
-    omip->INODE.i_links_count++; // increment link count
+    ip->i_links_count++; // increment link count
+    printf("INODE: %d, links_count: %d\n", mip->ino, ip->i_links_count);
 
-    omip->dirty = 1;
-    
+    mip->dirty = 1;
+
+    pip->i_atime = time(NULL);
     // release used minoids
-    iput(omip); 
-    iput(pmip);
+    iput(pmip); 
+    iput(mip);
 
+    return 0;
 }
 
+int my_unlink(char *pathname)
+{
+    char child[128], parent[128], buf[128];
+
+    int ino, pino;
+    MINODE *mip, *pmip;
+	INODE *pip, *ip;
+
+    ino = getino(pathname);
+    mip = iget(dev, ino);
+
+    ip = &mip->INODE;
+    pip = &mip->INODE;
+
+    if(S_ISDIR(ip->i_mode))
+    {
+        printf("ERROR: File provided is a directory.\n");
+
+        return -1;
+    }
+
+    strcpy(buf, pathname);
+    strcpy(parent, dirname(buf)); // dirname destroys path
+
+    strcpy(buf, pathname);
+    strcpy(child, basename(buf)); // basename destroys path
+
+
+    printf("INODE: %d, links_count: %d\n", mip->ino, ip->i_links_count);
+
+    ip->i_links_count--;
+    printf("INODE: %d, links_count: %d\n", mip->ino, ip->i_links_count);
+    if(ip->i_links_count == 0)
+    {
+        for (int i=0; i<12; i++){
+            if (ip->i_block[i]==0)
+                break;
+            bdalloc(mip->dev, ip->i_block[i]);
+        }
+        idalloc(mip->dev, mip->ino);
+    }
+
+    pino = getino(parent);
+    pmip = iget(dev, pino);
+
+    rm_child(pmip, child);
+
+    pip->i_atime = pip->i_mtime = time(NULL);
+    pmip->dirty = 1;
+    
+    
+    iput(pmip);
+    iput(mip); //(which clears mip->refCount = 0);
+
+    return 0;    
+}
