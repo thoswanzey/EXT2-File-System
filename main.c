@@ -12,8 +12,8 @@
 #include <time.h>
 
 #include "type.h"
-#include "alloc.c"
 #include "util.c"
+#include "alloc.c"
 #include "cd_ls_pwd.c"
 #include "mkdir.c"
 #include "creat.c"
