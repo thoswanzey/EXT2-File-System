@@ -38,15 +38,14 @@ int my_symlink(char *old_file, char *new_file)
     pmip = iget(dev, pino);
     pip = &pmip->INODE;
 
+    // creat new file for symlink
+    ino = my_creat(pmip, new_file);
+
     nino = getino(new_file);
     new_mip = iget(dev, nino);
     new_ip = &new_mip->INODE;
 
-
-    // creat new file for symlink
-    ino = my_creat(pmip, new_file);
-
-    // store in memory
+    // store filename in memory
     char *blocks = (char *)new_ip->i_block;
     memcpy(blocks, old_file, sizeof(old_file));
 
@@ -54,18 +53,27 @@ int my_symlink(char *old_file, char *new_file)
     new_ip->i_mode = 0120000;
     new_ip->i_size = strlen(old_file);
     
-    new_mip = iget(dev, ino);
-    new_mip->dirty = 1;
-    iput(new_mip);
-    
     pmip->dirty = 1;
     iput(pmip);
+    iput(mip);
+
+    new_mip->dirty = 1;
+    iput(new_mip);
 
     return 0;
 }
 
-// int readlink(char *pathname)
-// {
-    
-//     return 0;
-// }
+int my_readlink(char *pathname, char buf[])
+{
+    MINODE *mip;
+    int ino;
+
+    ino = getino(pathname);
+    mip = iget(dev, ino);
+
+    char *blocks = (char*)mip->INODE.i_block;
+    memcpy(buf, blocks, sizeof(blocks));
+
+    printf("Reading symlink: %s\n", blocks);
+    return 0;
+}
