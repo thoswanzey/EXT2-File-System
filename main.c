@@ -21,6 +21,7 @@
 #include "link.c"
 #include "unlink.c"
 #include "symlink.c"
+#include "touch.c"
 
 // global variables
 MINODE minode[NMINODE];
@@ -162,6 +163,10 @@ int main(int argc, char *argv[ ])
        my_unlink(pathname);
     else if (strcmp(cmd, "symlink")==0) 
        my_symlink(pathname, pathname_2);
+    else if (strcmp(cmd, "symlink")==0) 
+       my_symlink(pathname, pathname_2);
+    else if (strcmp(cmd, "touch")==0) 
+       my_touch(pathname);
     else
        printf("Invalid Command!\n");
   }

@@ -7,12 +7,16 @@ extern PROC *running;
 int ch_dir(char *pathname)   
 {
   int ino = getino(pathname);
-  if(ino == 0)
-    return -1;
+  if(ino == 0){
+	printf("ERROR - Directory does not exist\n");
+  	return -1;
+  }
   
   MINODE *mip = iget(dev, ino);
-  if(!S_ISDIR(mip->INODE.i_mode))
-    return -1;
+  if(!S_ISDIR(mip->INODE.i_mode)){
+	printf("ERROR - not a directory!\n");
+  	return -1;
+  }
   iput(running->cwd);
   running->cwd = mip;
 }
@@ -27,7 +31,7 @@ void print_info(MINODE *mip, char *name)
   u16 uid    = ip->i_uid;           // owner uid
   u16 gid    = ip->i_gid;           // group id
   u32 size   = ip->i_size;          // size in bytes
-	u16 mode   = ip->i_mode;          // DIR type, permissions
+  u16 mode   = ip->i_mode;          // DIR type, permissions
   u16 links  = ip->i_links_count;   // links count
 
   switch(mode&0xF000)
