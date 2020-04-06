@@ -36,7 +36,7 @@ int my_stat(char * path)
     }
 
     printf(")  Uid: %-10d Gid: %d\n", mip->INODE.i_uid, mip->INODE.i_gid);
-    printf("Access: %d\n",ctime((time_t *)&(mip->INODE.i_atime)));
+    printf("Access: %s\n",ctime((time_t *)&(mip->INODE.i_atime)));
     printf("Modify: %s\n",ctime((time_t *)&mip->INODE.i_mtime));
     printf("Change: %s\n",ctime((time_t *)&(mip->INODE.i_ctime)));
 
