@@ -5,7 +5,7 @@ extern int n, dev, ninodes, imap;
 extern PROC *running;
 
 
-int my_creat(MINODE *pip, char *child)
+int my_creat(MINODE *pmip, char *child)
 {
   DIR *dp;
   int ino = ialloc(dev);
@@ -28,9 +28,9 @@ int my_creat(MINODE *pip, char *child)
   mip->dirty = 1;               // mark minode dirty
   iput(mip);                    // write INODE to disk
 
-  enter_name(pip, ino, child);
+  enter_name(pmip, ino, child);
   
-  return 0;
+  return ino;
 }
 
 int create_file(char *path) 
