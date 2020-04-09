@@ -15,20 +15,28 @@ int my_symlink(char *old_file, char *new_file)
 	INODE *pip, *ip, *new_ip;
 
     ino = getino(old_file);
+
+    if(ino < 1)
+    {
+        printf(ERROR"ERROR -> File does not exist.\n"RESET);
+
+        return -1;
+    }
+
     mip = iget(dev, ino);
 
     ip = &mip->INODE;
 
     if(!S_ISDIR(ip->i_mode) && !S_ISREG(ip->i_mode))
     {
-        printf("ERROR -> old file provided must be a file or directory\n");
-        return -1;
+        printf(ERROR"ERROR -> old file provided must be a file or directory\n"RESET);
+        return -2;
     }
 
     if(getino(new_file) > 0)
     {
-        printf("ERROR -> new file already exists\n");
-        return -2;
+        printf(ERROR"ERROR -> new file already exists\n"RESET);
+        return -3;
     }
 
     strcpy(buf, new_file);
@@ -40,9 +48,7 @@ int my_symlink(char *old_file, char *new_file)
 
     // creat new file for symlink
     ino = my_creat(pmip, new_file);
-
-    nino = getino(new_file);
-    new_mip = iget(dev, nino);
+    new_mip = iget(dev, ino);
     new_ip = &new_mip->INODE;
 
     // store filename in memory
@@ -71,9 +77,13 @@ int my_readlink(char *pathname, char buf[])
     ino = getino(pathname);
     mip = iget(dev, ino);
 
-    char *blocks = (char*)mip->INODE.i_block;
-    memcpy(buf, blocks, sizeof(blocks));
+    if(!S_ISLNK(mip->INODE.i_mode)){
+        printf("Can't read link because is not link type\n");
+        return -1;
+    }
 
-    printf("Reading symlink: %s\n", blocks);
+    char *blocks = (char*)mip->INODE.i_block;
+    memcpy(buf, blocks, strlen(blocks));
+
     return 0;
 }

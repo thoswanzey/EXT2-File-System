@@ -56,7 +56,7 @@ int ialloc(int dev) {
       return i + 1;
     }
   }
-  printf("ERROR - inode was not allocated because no free inodes remain\n");
+  printf(ERROR"ERROR -> inode was not allocated because no free inodes remain\n"RESET);
   return 0;
 }
 
@@ -74,6 +74,6 @@ int balloc(int dev) {
       return i;
     }
   }
-  printf("ERROR - Block was not allocated because no free blocks remain\n");
+  printf(ERROR"ERROR -> Block was not allocated because no free blocks remain\n"RESET);
   return -1;
 }

@@ -79,7 +79,7 @@ MINODE *iget(int dev, int ino)
        return mip;
     }
   }   
-  printf("PANIC: no more free minodes\n");
+  printf(ERROR"PANIC: no more free minodes\n"RESET);
   return 0;
 }
 

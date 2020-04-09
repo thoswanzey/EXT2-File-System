@@ -5,13 +5,13 @@ extern int dev;
 int my_chmod(char * path, char * mode)
 {
     if(!mode[0]){//if no mode specified
-        printf("ERROR - no mode specified\n");
+        printf(ERROR"ERROR -> no mode specified\n"RESET);
         return -1;
     }
 
     int ino = getino(path);
     if(!ino){
-        printf("ERROR - file does not exist\n");
+        printf(ERROR"ERROR -> file does not exist\n"RESET);
         return -2;
     }
 
@@ -23,7 +23,7 @@ int my_chmod(char * path, char * mode)
     }
     else
     {
-        printf("ERROR - mode value must be in hexadecimal or octal\n");
+        printf(ERROR"ERROR -> mode value must be in hexadecimal or octal\n"RESET);
         return -3;
     }
 

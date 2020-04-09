@@ -118,6 +118,8 @@ int my_mkdir(MINODE *pip, char *child)
   mip->dirty = 1;               // mark minode dirty
   iput(mip);                    // write INODE to disk
 
+  //DIR created, time to add . and .. entries
+
   get_block(dev, bno, buf);//Read block from disk
   dp = (DIR*)buf;
 
@@ -160,18 +162,18 @@ int make_dir(char *path)
 
 
   if(!pip){
-    printf("ERROR - Provided parent directory does exists!\n");
+    printf(ERROR"ERROR -> Provided parent directory does exists!\n"RESET);
     return -1;
   }
 
   if(!S_ISDIR(pip->INODE.i_mode))
   {
-    printf("ERROR - Filepath does not point to a directory\n");
+    printf(ERROR"ERROR -> Filepath does not point to a directory\n"RESET);
     return -2;
   }
 
   if(getino(path)){
-    printf("ERROR - Directory already exists\n");
+    printf(ERROR"ERROR -> Directory already exists\n"RESET);
     return -3;
   }
 
@@ -234,18 +236,18 @@ int create_file(char *path)
   pip = iget(dev, ino);
 
   if(!pip){
-    printf("ERROR - Provided parent directory does exists!\n");
+    printf(ERROR"ERROR -> Provided parent directory does exists!\n"RESET);
     return -1;
   }
 
   if(!S_ISDIR(pip->INODE.i_mode))
   {
-    printf("ERROR - Provided parent directory is not a directory!\n");
+    printf(ERROR"ERROR -> Provided parent directory is not a directory!\n"RESET);
     return -2;
   }
 
   if(getino(path)){
-    printf("ERROR - File already exists!\n");
+    printf(ERROR"ERROR -> File already exists!\n"RESET);
     return -3;
   }
 

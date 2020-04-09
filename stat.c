@@ -6,7 +6,7 @@ int my_stat(char * path)
     char *permission = "rwxrwxrwx", type[20], access[20], temp[128];
     int ino = getino(path);
     if(!ino){
-        printf("ERROR - file does not exist\n");
+        printf(ERROR"ERROR - file does not exist\n"RESET);
         return -1;
     }
 

@@ -13,6 +13,14 @@ int my_link(char *old_file, char *new_file)
 	INODE *pip, *ip;
 
     ino = getino(old_file);
+    
+    if(ino < 1)
+    {
+        printf(ERROR"ERROR -> File does not exist.\n"RESET);
+
+        return -1;
+    }
+
     mip = iget(dev, ino);
 
     ip = &mip->INODE;
@@ -20,14 +28,14 @@ int my_link(char *old_file, char *new_file)
 
     if(S_ISDIR(ip->i_mode))
     {
-        printf("ERROR: File provided is a directory.\n");
+        printf(ERROR"ERROR -> File provided is a directory.\n"RESET);
 
         return -1;
     }
 
     if(getino(new_file) != 0)
     {
-        printf("ERROR: New link must not exist.\n");
+        printf(ERROR"ERROR -> New link must not exist.\n"RESET);
 
         return -2;
     }
@@ -73,7 +81,7 @@ int my_unlink(char *pathname)
 
     if(S_ISDIR(ip->i_mode))
     {
-        printf("ERROR -> File provided is a directory.\n");
+        printf(ERROR"ERROR -> File provided is a directory.\n"RESET);
 
         return -1;
     }

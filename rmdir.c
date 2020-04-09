@@ -11,7 +11,7 @@ int rm_child(MINODE *pip, char *name){
 		if(pip->INODE.i_block[i] == 0)
 			return;
 
-        get_block(dev, pip->INODE.i_block[i], buf);
+        get_block(pip->dev, pip->INODE.i_block[i], buf);
         cp = buf;
         dp = (DIR*)cp;
 
@@ -22,13 +22,18 @@ int rm_child(MINODE *pip, char *name){
             if(!strcmp(name, temp)){ //Found child
                 if(cp + dp->rec_len == buf + 1024)//Last entry in block
                 {
+                    printf("Last entry in block\n");
                     dp_prev->rec_len += dp->rec_len;
                     put_block(dev, pip->INODE.i_block[i], buf);
                 }
                 
                 else if(cp == buf && cp + dp->rec_len == buf + BLKSIZE)//first and only entry
                 {
+                    printf("First and only entry in block\n");
+                    //Only entry in block, so we can get rid of it
                     bdalloc(dev, pip->INODE.i_block[i]);
+
+                    //Move nonzero blocks up to get rid of holes
                     for(; pip->INODE.i_block[i] && i < 11; i++)
                     {
                         get_block(dev, pip->INODE.i_block[i + 1], buf);
@@ -38,19 +43,24 @@ int rm_child(MINODE *pip, char *name){
                 }
                 else//in middle of inodes
                 {
+                    printf("Middle entry in block\n");
                     char *final_cp = cp + dp->rec_len;
                     DIR *final_dp = (DIR*)final_cp;
+
+                    //Find final entry
                     while(final_cp + final_dp->rec_len < buf + BLKSIZE)
                     {
                         final_cp += final_dp->rec_len;
                         final_dp = (DIR*)final_cp;
                     }
+                    //Add rec_len from removed record to last record
                     final_dp->rec_len += dp->rec_len;
+
+                    //Shift remaining records to fill in gap
                     memmove(cp, cp + dp->rec_len, buf + 1024 -(cp + dp->rec_len));
                     put_block(dev, pip->INODE.i_block[i], buf);
                 }
-                pip->dirty = 1;
-                iput(pip);
+                return 0;
             }
             dp_prev = dp;
             cp += dp->rec_len;
@@ -64,34 +74,41 @@ int rm_child(MINODE *pip, char *name){
 int my_rmdir(char * path){
     if(!strcmp(path, "/" ) || !strcmp(path, ".." ) || !strcmp(path, "." ))
     {
-        printf("ERROR - Cannot delete root directory, current directory, or parent of current directory\n");
+        printf(ERROR"ERROR -> Cannot delete root directory, current directory, or parent of current directory\n"RESET);
         return -1;
     }
     int ino;
     MINODE * mip;
 
     ino = getino(path);
-    if(ino < 0){
-        printf("ERROR - Directory not found\n");
+    if(!ino){
+        printf(ERROR"ERROR -> Directory not found\n"RESET);
         return -2;
     }
 
     mip = iget(dev, ino);
     if(mip->INODE.i_uid != running->uid && running->uid != 0){
-        printf("ERROR - You do not have permission to do this\n");
+        printf(ERROR"ERROR -> You do not have permission to do this\n"RESET);
+        iput(mip);
         return -3;
     }
 
-    if(!S_ISDIR(mip->INODE.i_mode)){
-        printf("ERROR - provided path is not a directory\n");
-        iput(mip);
+    if(mip->refCount > 1)
+    {
+        printf(ERROR"ERROR -> MINODE is busy\n"RESET);
         return -4;
     }
 
-    if(mip->INODE.i_links_count > 2){
-        printf("ERROR - Cannot delete a directory that isn't empty\n");
+    if(!S_ISDIR(mip->INODE.i_mode)){
+        printf(ERROR"ERROR -> provided path is not a directory\n"RESET);
         iput(mip);
         return -5;
+    }
+
+    if(mip->INODE.i_links_count > 2){
+        printf(ERROR"ERROR -> Cannot delete a directory that isn't empty\n"RESET);
+        iput(mip);
+        return -6;
     }
 
     //Dir only has 2 links at this point, but may still contain files
@@ -106,8 +123,8 @@ int my_rmdir(char * path){
         filename[dp->name_len] = '\0';  //Add null termination character
         if(strcmp(filename, ".") && strcmp(filename, "..")){
             iput(mip);
-            printf("ERROR - Cannot delete a directory that isn't empty\n");
-            return -6;
+            printf(ERROR"ERROR -> Cannot delete a directory that isn't empty\n"RESET);
+            return -7;
         }
         cp += dp->rec_len;
         dp = (DIR *)cp;
