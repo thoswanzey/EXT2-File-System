@@ -20,6 +20,8 @@
 #include "link_unlink.c"
 #include "symlink.c"
 #include "touch.c"
+#include "stat.c"
+#include "chmod.c"
 
 // global variables
 MINODE minode[NMINODE];
@@ -129,7 +131,7 @@ int main(int argc, char *argv[ ])
   // WRTIE code here to create P1 as a USER process
   
   while(1){
-    printf("\ninput command : [ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink] ");
+    printf("\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink|touch|stat|chmod]\ninput command : ");
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
 
@@ -165,6 +167,10 @@ int main(int argc, char *argv[ ])
        my_symlink(pathname, pathname_2);
     else if (strcmp(cmd, "touch")==0) 
        my_touch(pathname);
+    else if (strcmp(cmd, "stat")==0) 
+       my_stat(pathname);
+    else if (strcmp(cmd, "chmod")==0) 
+       my_chmod(pathname, pathname_2);
     else
        printf("Invalid Command!\n");
   }
