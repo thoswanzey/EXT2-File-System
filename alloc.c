@@ -6,9 +6,41 @@ extern PROC *running;
 
 int tst_bit(char *buf, int bit) { return buf[bit / 8] & (1 << (bit % 8)); }
 
-
 int set_bit(char *buf, int bit) { buf[bit / 8] |= (1 << (bit % 8)); }
 
+void clr_bit(char *buf, int bit){buf[bit/8] &= ~(1 << (bit % 8));}
+
+int idalloc(int dev, int ino)  // deallocate an ino number
+{ 
+  char buf[BLKSIZE];
+
+  if (ino > ninodes || ino < 0){
+    printf("inumber %d out of range\n", ino);
+    return 0;
+  }
+
+  // get inode bitmap block
+  get_block(dev, imap, buf);
+  clr_bit(buf, ino-1);
+
+  // write buf back
+  put_block(dev, imap, buf);
+}
+
+int bdalloc(int dev, int blk) // deallocate a blk number
+{
+    char buf[BLKSIZE];
+
+    if(blk > ninodes || blk < 0){
+        printf("bnumber %d out of range\n", blk);
+        return 0;
+    }
+
+    get_block(dev, bmap, buf);
+    clr_bit(buf, blk);
+
+    put_block(dev, bmap, buf);
+}
 
 int ialloc(int dev) {
   int i;
@@ -44,68 +76,4 @@ int balloc(int dev) {
   }
   printf("ERROR - Block was not allocated because no free blocks remain\n");
   return -1;
-}
-
-int idealloc(int ino)
-{
-    INODE *ip;
-    char buf[BLKSIZE];
-    int byte, bit;
-
-    byte = ino / 8;
-    bit = ino % 8;
-    
-    get_block(dev, bmap, buf);
-
-    buf[byte] &= ~(1 << bit);
-
-    put_block(dev, bmap, buf);
-
-    get_block(dev, 1, buf);
-    sp = (SUPER *)buf;
-    sp->s_free_blocks_count++;
-    put_block(dev, 1, buf);
-
-    get_block(dev, 2, buf);
-    gp = (GD *)buf;
-    gp->bg_free_blocks_count++;
-    put_block(dev, 2, buf);
-
-    return 0;
-}
-
-int my_truncate(MINODE *mip)
-{
-    INODE *ip;
-    char buf[BLKSIZE];
-    int byte, bit, ino;
-    
-    
-    ip = &(mip->INODE);
-
-    for(int i = 0; i < 12; i++)
-    {
-        ino = ip->i_block[i];
-
-        byte = ino / 8;
-        bit = ino % 8;
-
-        get_block(dev, bmap, buf);
-
-        buf[byte] &= ~(1 << bit);
-
-        put_block(dev, bmap, buf);
-
-        get_block(dev, 1, buf);
-        sp = (SUPER *)buf;
-        sp->s_free_blocks_count++;
-        put_block(dev, 1, buf);
-
-        get_block(dev, 2, buf);
-        gp = (GD *)buf;
-        gp->bg_free_blocks_count++;
-        put_block(dev, 2, buf);
-
-        return 0;
-    }
 }

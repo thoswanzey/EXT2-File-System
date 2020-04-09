@@ -15,11 +15,9 @@
 #include "util.c"
 #include "alloc.c"
 #include "cd_ls_pwd.c"
-#include "mkdir.c"
-#include "creat.c"
+#include "mkdir_creat.c"
 #include "rmdir.c"
-#include "link.c"
-#include "unlink.c"
+#include "link_unlink.c"
 #include "symlink.c"
 #include "touch.c"
 
