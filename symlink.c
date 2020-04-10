@@ -30,12 +30,14 @@ int my_symlink(char *old_file, char *new_file)
     if(!S_ISDIR(ip->i_mode) && !S_ISREG(ip->i_mode))
     {
         printf(ERROR"ERROR -> old file provided must be a file or directory\n"RESET);
+        iput(mip);
         return -2;
     }
 
     if(getino(new_file) > 0)
     {
         printf(ERROR"ERROR -> new file already exists\n"RESET);
+        iput(mip);
         return -3;
     }
 
@@ -75,11 +77,17 @@ int my_readlink(char *pathname, char buf[])
     int ino;
 
     ino = getino(pathname);
-    mip = iget(dev, ino);
-
-    if(!S_ISLNK(mip->INODE.i_mode)){
-        printf("Can't read link because is not link type\n");
+    if(ino < 1)
+    {
+        printf(ERROR"ERROR -> File does not exist.\n"RESET);
         return -1;
+    }
+
+    mip = iget(dev, ino);
+    if(!S_ISLNK(mip->INODE.i_mode))
+    {
+        printf("Can't read link because is not link type\n");
+        return -2;
     }
 
     char *blocks = (char*)mip->INODE.i_block;

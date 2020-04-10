@@ -7,7 +7,8 @@ int rm_child(MINODE *pip, char *name){
     DIR *dp, *dp_prev;;
 
     for(int i = 0; i < 12 ; i++)
-	{
+	{   
+        //If no more blocks allocated, return
 		if(pip->INODE.i_block[i] == 0)
 			return;
 

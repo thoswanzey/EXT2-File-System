@@ -24,7 +24,6 @@ int my_link(char *old_file, char *new_file)
     mip = iget(dev, ino);
 
     ip = &mip->INODE;
-    pip = &mip->INODE;
 
     if(S_ISDIR(ip->i_mode))
     {
@@ -50,6 +49,7 @@ int my_link(char *old_file, char *new_file)
 
     pino = getino(parent);
     pmip = iget(dev, pino);
+    pip = &pmip->INODE;
 
     enter_name(pmip, ino, child); // add hard link entry
 
@@ -75,6 +75,12 @@ int my_unlink(char *pathname)
 	INODE *pip, *ip;
 
     ino = getino(pathname);
+    if(ino == 0)
+    {
+        printf(ERROR"ERROR -> File does not exist.\n"RESET);
+        return -1;
+    }
+
     mip = iget(dev, ino);
 
     ip = &mip->INODE;

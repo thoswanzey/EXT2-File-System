@@ -62,6 +62,7 @@ int enter_name(MINODE *pmip, int myino, char *myname){
       return 0;
     }
 
+    //If we get here, there's not enough space in the allocated blocks, so allocate another
     printf("Block number = %d\n", i);
 
     pblk = balloc(dev); // get the first available block for new inode
@@ -118,7 +119,7 @@ int my_mkdir(MINODE *pip, char *child)
   mip->dirty = 1;               // mark minode dirty
   iput(mip);                    // write INODE to disk
 
-  //DIR created, time to add . and .. entries
+  //DIR created, time to add . and .. entries to allocated block
 
   get_block(dev, bno, buf);//Read block from disk
   dp = (DIR*)buf;
@@ -136,7 +137,7 @@ int my_mkdir(MINODE *pip, char *child)
   dp->rec_len = 1012;//Rest of block
 
   put_block(dev, bno, buf);//Write block back to disk
-  enter_name(pip, ino, child);
+  enter_name(pip, ino, child);//enter name into parent's directory
   
   return 0;
 }
@@ -144,7 +145,7 @@ int my_mkdir(MINODE *pip, char *child)
 int make_dir(char *path) 
 { 
   char buf[128], parent[128], child[128], temp[128];
-  MINODE *pip; 
+  MINODE *pmip; 
 
 
   strcpy(buf, path);
@@ -155,18 +156,17 @@ int make_dir(char *path)
   strcpy(temp, buf);
   strcpy(child, basename(temp)); // basename destroys path
 
-  int ino;
+  int pino;
 
-  ino = getino(parent);
-  pip = iget(dev, ino);
-
-
-  if(!pip){
-    printf(ERROR"ERROR -> Provided parent directory does exists!\n"RESET);
-    return -1;
+  pino = getino(parent);
+  if(pino < 1)
+  {
+    printf(ERROR"ERROR -> Specified parent directory does not exits"RESET);
   }
 
-  if(!S_ISDIR(pip->INODE.i_mode))
+  pmip = iget(dev, pino);
+
+  if(!S_ISDIR(pmip->INODE.i_mode))
   {
     printf(ERROR"ERROR -> Filepath does not point to a directory\n"RESET);
     return -2;
@@ -177,13 +177,13 @@ int make_dir(char *path)
     return -3;
   }
 
-  my_mkdir(pip, child);
+  my_mkdir(pmip, child);
 
-  pip->INODE.i_links_count++;
-  pip->INODE.i_atime = time(NULL);
-  pip->dirty = 1;
+  pmip->INODE.i_links_count++;
+  pmip->INODE.i_atime = time(NULL);
+  pmip->dirty = 1;
 
-  iput(pip);
+  iput(pmip);
 
   return 0;
 }
