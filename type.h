@@ -19,7 +19,10 @@ DIR   *dp;
 #define BLKSIZE  1024
 #define NMINODE   128
 #define NFD        16
+#define NOFT       40
 #define NPROC       2
+
+#define SUPER_USER  0
 
 typedef struct minode{
   INODE INODE;
