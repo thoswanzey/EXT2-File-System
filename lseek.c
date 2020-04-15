@@ -1,7 +1,7 @@
 /************* lseek.c file **************/
 
 
-int lseek(int fd, int position)
+int my_lseek(int fd, int position)
 {
     int initial_offset;
     OFT *oftp = running->fd[fd];

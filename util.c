@@ -233,7 +233,7 @@ int findino(MINODE *mip, u32 *myino) // myino = ino of . return ino of ..
   return dp->inode;
 }
 
-int truncate(MINODE * mip)
+int my_truncate(MINODE * mip)
 {
    //Set to 1 just to get into while loop
    int bno = 1, lbk = 0, iblk, diblk;
@@ -244,20 +244,20 @@ int truncate(MINODE * mip)
    while(bno)
    {
       if(lbk < 12){
-         bno = mip->INODE.i_block[lbk]
+         bno = mip->INODE.i_block[lbk];
       }
       else if(lbk >= 12 && lbk < 12 + 256){
          if(!mip->INODE.i_block[12]) break;
-         memcpy(buf, mip->i_block[12], BLKSIZE)
+         get_block(mip->dev, mip->INODE.i_block[12], buf);
          bno = buf[lbk-12];
       }
       else if(lbk >= 12 + 256 && lbk < 12 + 256 + 256*256)
       {
-         if(!mip->INODE.iblock[13]) break;
-         memcpy(buf, mip->iblock[13], BLKSIZE);
+         if(!mip->INODE.i_block[13]) break;
+         get_block(mip->dev, mip->INODE.i_block[13], buf);
          iblk = (lbk - (12 + 256)) / 256;
          if(!buf[iblk]) break;
-         memcpy(buf2, (void *) buf[iblk], BLKSIZE)
+         get_block(mip->dev, buf[iblk], buf2);
          diblk = (lbk - (12 + 256)) % 256;
          bno = buf2[diblk];
       }

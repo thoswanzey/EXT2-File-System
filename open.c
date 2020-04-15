@@ -121,7 +121,7 @@ int open_file(char *path, int mode)
         findOFT->offset = (mode == MODE_APPEND) ? mip->INODE.i_size : 0;
         findOFT->mode = mode;
         findOFT->mptr = mip;
-        if(mode == MODE_W) truncate(mip);
+        if(mode == MODE_W) my_truncate(mip);
     }
 
     //Find first open FD
