@@ -50,7 +50,7 @@ int open_file(char *path, int mode)
     {
         printf(ERROR"ERROR -> Not a regular file\n"RESET);
         iput(mip);
-        return -3;
+        return -4;
     }
 
     int permissionBits = PERMISSIONS_OTHER;
@@ -64,7 +64,7 @@ int open_file(char *path, int mode)
         {
             printf(ERROR"ERROR -> You do not have permission to do this\n"RESET);
             iput(mip);
-            return -4;
+            return -5;
         }
     }
 
@@ -75,7 +75,7 @@ int open_file(char *path, int mode)
         {
             printf(ERROR"ERROR -> You do not have permission to do this\n"RESET);
             iput(mip);
-            return -5;
+            return -6;
         }
     }
 
@@ -90,13 +90,13 @@ int open_file(char *path, int mode)
             if(oft[i].mode != MODE_R){
                 printf(ERROR"ERROR -> File is currently being accessed\n"RESET);
                 iput(mip);
-                return -6;
+                return -7;
             }
             //If already open in read mode, but trying to open in a different mode
             else if(mode != MODE_R){
                 printf(ERROR"ERROR -> File is currently being accessed\n"RESET);
                 iput(mip);
-                return -7;
+                return -8;
             }
             //Already open in read mode, and trying to open in Read mode, so OK
             else{
@@ -111,7 +111,7 @@ int open_file(char *path, int mode)
     {
         printf(ERROR"ERROR -> No available OFT found\n"RESET);
         iput(mip);
-        return -8; 
+        return -9; 
     }
 
     //This means we didn't find existing OFT, so initialize it
@@ -140,7 +140,7 @@ int open_file(char *path, int mode)
         printf(ERROR"ERROR -> No available FD's found\n"RESET);
         findOFT->refCount--;
         iput(mip);
-        return -9;
+        return -10;
     }
 
     //update access time
