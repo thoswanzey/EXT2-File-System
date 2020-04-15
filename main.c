@@ -24,6 +24,8 @@
 #include "stat.c"
 #include "chmod.c"
 #include "open.c"
+#include "close.c"
+#include "lseek.c"
 
 int init()
 {
