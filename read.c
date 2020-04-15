@@ -10,7 +10,8 @@ int my_read(int fd, char buf[], int nbytes)
 
     int avil, blk, lbk, dblk, startByte, remain, count = 0;
 
-    char buf_12[256], buf_13[256], dbuf[256], readbuf[BLKSIZE];
+    char readbuf[BLKSIZE];
+    int buf_12[256], buf_13[256], dbuf[256];
 
     char *cq, *cp;
     cq = buf;
