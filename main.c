@@ -28,6 +28,7 @@
 #include "lseek.c"
 #include "pfd.c"
 #include "read.c"
+#include "cat.c"
 
 int init()
 {
