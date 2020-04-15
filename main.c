@@ -12,6 +12,7 @@
 #include <time.h>
 
 #include "type.h"
+#include "global.c"
 #include "util.c"
 #include "alloc.c"
 #include "cd_ls_pwd.c"
@@ -22,27 +23,14 @@
 #include "touch.c"
 #include "stat.c"
 #include "chmod.c"
-
-// global variables
-MINODE minode[NMINODE];
-MINODE *root;
-
-PROC   proc[NPROC], *running;
-
-char gpath[128]; // global for tokenized components
-char *name[32];  // assume at most 32 components in pathname
-int   n;         // number of component strings
-
-int fd, dev;
-int nblocks, ninodes, bmap, imap, inode_start; // disk parameters
-
+#include "open.c"
 
 int init()
 {
   int i, j;
   MINODE *mip;
   PROC   *p;
-
+  OFT    *o;
   printf("init()\n");
 
   for (i=0; i<NMINODE; i++){
@@ -60,6 +48,13 @@ int init()
     p->status = FREE;
     for (j=0; j<NFD; j++)
       p->fd[j] = 0;
+  }
+  for (i=0; i<NOFT; i++){
+    o = &oft[i];
+    o->refCount = 0;
+    o->offset = 0;
+    o->mptr = NULL;
+    o->mode = 0;
   }
 }
 

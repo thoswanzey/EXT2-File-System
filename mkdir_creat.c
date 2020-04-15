@@ -219,7 +219,7 @@ int my_creat(MINODE *pmip, char *child)
 int create_file(char *path) 
 { 
   char buf[128], parent[128], child[128], temp[128];
-  MINODE *pip; 
+  MINODE *pmip; 
 
 
   strcpy(buf, path);
@@ -230,17 +230,17 @@ int create_file(char *path)
   strcpy(temp, buf);
   strcpy(child, basename(temp)); // basename destroys path
 
-  int ino;
+  int pino;
 
-  ino = getino(parent);
-  pip = iget(dev, ino);
+  pino = getino(parent);
+  pmip = iget(dev, pino);
 
-  if(!pip){
+  if(!pmip){
     printf(ERROR"ERROR -> Provided parent directory does exists!\n"RESET);
     return -1;
   }
 
-  if(!S_ISDIR(pip->INODE.i_mode))
+  if(!S_ISDIR(pmip->INODE.i_mode))
   {
     printf(ERROR"ERROR -> Provided parent directory is not a directory!\n"RESET);
     return -2;
@@ -251,12 +251,12 @@ int create_file(char *path)
     return -3;
   }
 
-  my_creat(pip, child);
+  my_creat(pmip, child);
 
-  pip->INODE.i_atime = time(NULL);
-  pip->dirty = 1;
+  pmip->INODE.i_atime = time(NULL);
+  pmip->dirty = 1;
 
-  iput(pip);
+  iput(pmip);
 
   return 0;
 }
