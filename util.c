@@ -8,6 +8,11 @@ extern MINODE minode[NMINODE];
 extern MINODE *root;
 extern int inode_start;
 
+int fd_is_valid(int fd)
+{
+   return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+}
+
 int get_block(int dev, int blk, char *buf)
 {
    lseek(dev, (long)blk*BLKSIZE, 0);
