@@ -8,7 +8,7 @@ int my_cat(char *path)
     fd = open_file(path, MODE_R);
     if(fd < 0)
     {
-        prtinf(ERROR"ERROR -> Unable to open file\n"RESET);
+        printf(ERROR"ERROR -> Unable to open file\n"RESET);
         return -1;
     }
 

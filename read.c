@@ -75,13 +75,11 @@ int my_read(int fd, char buf[], int nbytes)
                 break;
         }
 
-        printf("READ: read %d bytes from file descriptor %d\n", count, fd);
-
-        return count;
     }
 
+    printf("READ: read %d bytes from file descriptor %d\n", count, fd);
 
-
+    return count;
 }
 
 int read_file()
