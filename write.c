@@ -19,7 +19,6 @@ int my_write(int fd, char buf[], int nbytes)
 {
     MINODE *mip;
     OFT *oftp;
-    int *indirect, *d_indirect;
 
     int avil, blk, lbk, dblk, startByte, remain, count = 0;
 
@@ -54,32 +53,19 @@ int my_write(int fd, char buf[], int nbytes)
             if (mip->INODE.i_block[12] == 0)
             {
                 mip->INODE.i_block[12] = balloc(mip->dev);
-
-                // get new allocated block
-                get_block(mip->dev, mip->INODE.i_block[12], buf_12);
-
-                // zero out the block on disk
-                for(int i = 0; i < 256; i++)
-                {
-                    buf_12[i] = 0;
-                }
-
-                // put zero'd out block back
-                put_block(mip->dev, mip->INODE.i_block[12], buf_12);
-
             }
             
-            indirect = (int*)buf_12 + lbk - 12;
+            lbk -= 12;
+            get_block(mip->dev, mip->INODE.i_block[12], buf_12);
 
-            blk = indirect[lbk - 12];
-
+            blk = buf_12[lbk];
             // allocate new block if does not exist
             if(blk == 0)
             {
                 // allocate new block
-                blk = balloc(mip->dev);
+                blk = buf_12[lbk] = balloc(mip->dev);
                 // record block
-                put_block(mip->dev, mip->INODE.i_block[12], blk);
+                put_block(mip->dev, mip->INODE.i_block[12], buf_12);
             }
         }
         // DOUBLE INDIRECT
@@ -88,18 +74,6 @@ int my_write(int fd, char buf[], int nbytes)
             if(mip->INODE.i_block[13] == 0)
             {
                 mip->INODE.i_block[13] = balloc(mip->dev);
-
-                // get new allocated block
-                get_block(mip->dev, mip->INODE.i_block[13], buf_13);
-
-                // zero out the block on disk
-                for(int i = 0; i < 256; i++)
-                {
-                    buf_13[i] = 0;
-                }
-
-                // put zero'd out block back
-                put_block(mip->dev, mip->INODE.i_block[13], buf_13);
             }
 
             lbk -= (12 + 256);
@@ -108,38 +82,22 @@ int my_write(int fd, char buf[], int nbytes)
 
             dblk = buf_13[lbk/256];
 
+            // allocate new block if does not exist
+            if(dblk == 0)
+            {
+                dblk = buf_13[lbk/256] = balloc(mip->dev);
+                put_block(mip->dev, mip->INODE.i_block[13], buf_13);
+            }
+
             get_block(mip->dev, dblk, dbuf);
 
             blk = dbuf[lbk%256];
 
             // allocate new block if does not exist
-            if(dblk == 0)
-            {
-                d_indirect = balloc(mip->dev);
-                dblk = d_indirect;
-
-                get_block(mip->dev, dblk, writebuf);
-                for(int i = 0; i < 256; i++)
-                {
-                    writebuf[i] = 0;
-                }
-
-                put_block(mip->dev, dblk, writebuf);
-            }
-
-            // allocate new block if does not exist
             if(blk == 0)
             {
-                d_indirect = balloc(mip->dev);
-                blk = d_indirect;
-
-                get_block(mip->dev, blk, writebuf);
-                for(int i = 0; i < 256; i++)
-                {
-                    writebuf[i] = 0;
-                }
-
-                put_block(mip->dev, blk, writebuf);
+                blk = dbuf[lbk%256] = balloc(mip->dev);
+                put_block(mip->dev, dblk, dbuf);
             }
 
         }

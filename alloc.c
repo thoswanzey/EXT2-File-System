@@ -71,6 +71,16 @@ int balloc(int dev) {
       set_bit(buf, i);
       put_block(dev, bmap, buf);
       printf("allocated bno = %d\n", i);
+
+      //get newly allocated block
+      get_block(dev, i, buf);
+      // zero out the block on disk
+      for(int j = 0; j < BLKSIZE; j++)
+      {
+          buf[j] = 0;
+      }
+      // put zero'd out block back
+      put_block(dev, i, buf);
       return i;
     }
   }
