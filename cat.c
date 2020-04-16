@@ -13,11 +13,7 @@ int my_cat(char *path)
     }
 
     while(n = my_read(fd, mybuf, BLKSIZE)){
-        mybuf[n] = 0;
-        for(int i = 0; i<n; i++)
-        {
-            write(1, mybuf, n);
-        }
+        write(1, mybuf, n);
     }
 
     close_file(fd);
