@@ -131,7 +131,7 @@ int main(int argc, char *argv[ ])
   running->status = READY;
   running->cwd = iget(dev, 2);
   printf("root refCount = %d\n", root->refCount);
-
+  
   // WRTIE code here to create P1 as a USER process
   while(1){
     printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink|touch|stat|chmod]\n" BOLD "input command : "RESET);
@@ -181,7 +181,7 @@ int main(int argc, char *argv[ ])
     else if (strcmp(cmd, "cp")==0) 
        my_cp(pathname, pathname_2);
     else if (strcmp(cmd, "mv")==0) 
-       mv(pathname, pathname_2);
+       my_mv(pathname, pathname_2);
     else
        printf("Invalid Command!\n");
   }
