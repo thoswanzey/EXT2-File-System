@@ -1,6 +1,6 @@
 /************* mv.c file **************/
 
-int mv(char *src, char*dest)
+int my_mv(char *src, char*dest)
 {
     char destination[256], temp[256], sourceFileName[64];
     int src_ino, dest_ino, src_dev, dest_dev;
