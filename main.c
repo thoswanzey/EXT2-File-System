@@ -131,7 +131,7 @@ int main(int argc, char *argv[ ])
   printf("root refCount = %d\n", root->refCount);
 
   // WRTIE code here to create P1 as a USER process
-   write_file(open_file("test", 2), "hi");
+   write_file(open_file("test", 2), "hi123456789");
 
   while(1){
     printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink|touch|stat|chmod]\n" BOLD "input command : "RESET);

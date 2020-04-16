@@ -4,7 +4,7 @@ int write_file(int fd, char *str)
 {
     char buf[256];
 
-    if(!fd_is_valid(fd))
+    if(fd < 0 || fd > NFD)
     {
         printf("File descriptor provided is not valid.");
         return -1;
@@ -12,7 +12,7 @@ int write_file(int fd, char *str)
 
     strcpy(buf, str);
 
-    return my_write(fd, buf, sizeof(buf));
+    return my_write(fd, buf, strlen(buf));
 }
 
 int my_write(int fd, char buf[], int nbytes)
@@ -59,7 +59,7 @@ int my_write(int fd, char buf[], int nbytes)
                 get_block(mip->dev, mip->INODE.i_block[12], buf_12);
 
                 // zero out the block on disk
-                for(int i = 0; i < BLKSIZE; i++)
+                for(int i = 0; i < 256; i++)
                 {
                     buf_12[i] = 0;
                 }
@@ -93,7 +93,7 @@ int my_write(int fd, char buf[], int nbytes)
                 get_block(mip->dev, mip->INODE.i_block[13], buf_13);
 
                 // zero out the block on disk
-                for(int i = 0; i < BLKSIZE; i++)
+                for(int i = 0; i < 256; i++)
                 {
                     buf_13[i] = 0;
                 }
@@ -119,7 +119,7 @@ int my_write(int fd, char buf[], int nbytes)
                 dblk = d_indirect;
 
                 get_block(mip->dev, dblk, writebuf);
-                for(int i = 0; i < BLKSIZE; i++)
+                for(int i = 0; i < 256; i++)
                 {
                     writebuf[i] = 0;
                 }
@@ -134,7 +134,7 @@ int my_write(int fd, char buf[], int nbytes)
                 blk = d_indirect;
 
                 get_block(mip->dev, blk, writebuf);
-                for(int i = 0; i < BLKSIZE; i++)
+                for(int i = 0; i < 256; i++)
                 {
                     writebuf[i] = 0;
                 }
@@ -150,10 +150,11 @@ int my_write(int fd, char buf[], int nbytes)
         cp = writebuf + startByte;
         remain = BLKSIZE - startByte;
 
-        // reading one byte at a time
+        // writing one byte at a time
         while(remain > 0)
         {
             *cp++ = *cq++;
+            count++;
             nbytes--;
             remain--;
             oftp->offset++;
@@ -169,7 +170,7 @@ int my_write(int fd, char buf[], int nbytes)
 
     }
     mip->dirty = 1;
-    printf("wrote %d bytes into file descriptor fd=%d\n", nbytes, fd);
+    printf("wrote %d bytes into file descriptor fd=%d\n", count, fd);
 
     return nbytes;
 }
