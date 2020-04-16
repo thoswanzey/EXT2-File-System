@@ -2,6 +2,26 @@
 
 extern PROC *running;
 
+int read_file(int fd, int nbytes)
+{
+    int bytes_read;
+
+    char buf[nbytes];
+
+    if(fd < 0 || fd > NFD)
+    {
+        printf("File descriptor provided is not valid.");
+        return -1;
+    }
+    
+    bytes_read = my_read(fd, buf, nbytes);
+
+    printf("%s\n", buf);
+
+    return bytes_read;
+} 
+
+
 int my_read(int fd, char buf[], int nbytes)
 {
     MINODE *mip;
@@ -16,7 +36,7 @@ int my_read(int fd, char buf[], int nbytes)
     char *cq, *cp;
     cq = buf;
 
-    oftp = running->fd;
+    oftp = running->fd[fd];
     mip = oftp->mptr;
 
     // num of bytes available in the file
@@ -82,6 +102,3 @@ int my_read(int fd, char buf[], int nbytes)
     return count;
 }
 
-int read_file()
-{
-} 

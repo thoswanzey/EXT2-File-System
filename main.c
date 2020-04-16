@@ -181,7 +181,7 @@ int main(int argc, char *argv[ ])
     else if (strcmp(cmd, "cp")==0) 
        my_cp(pathname, pathname_2);
     else if (strcmp(cmd, "mv")==0) 
-       my_mv(pathname, pathname_2);
+       mv(pathname, pathname_2);
     else
        printf("Invalid Command!\n");
   }
