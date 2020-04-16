@@ -1,6 +1,6 @@
 /************* pfd.c file **************/
 
-int pfd(void)
+int my_pfd(void)
 {
     char * modes[] = {"READ", "WRITE", "READ/WRITE", "APPEND"};
     printf(BOLD" fd      mode     offset     INODE\n"RESET);

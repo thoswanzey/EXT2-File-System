@@ -29,6 +29,8 @@
 #include "pfd.c"
 #include "read.c"
 #include "cat.c"
+#include "cp.c"
+#include "mv.c"
 
 int init()
 {
@@ -171,6 +173,12 @@ int main(int argc, char *argv[ ])
        my_stat(pathname);
     else if (strcmp(cmd, "chmod")==0) 
        my_chmod(pathname, pathname_2);
+    else if (strcmp(cmd, "pfd")==0) 
+       my_pfd();
+    else if (strcmp(cmd, "cp")==0) 
+       my_cp(pathname, pathname_2);
+    else if (strcmp(cmd, "mv")==0) 
+       my_mv(pathname, pathname_2);
     else
        printf("Invalid Command!\n");
   }
