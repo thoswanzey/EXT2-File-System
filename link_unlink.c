@@ -28,14 +28,14 @@ int my_link(char *old_file, char *new_file)
     if(S_ISDIR(ip->i_mode))
     {
         printf(ERROR"ERROR -> File provided is a directory.\n"RESET);
-
+        iput(mip);
         return -1;
     }
 
     if(getino(new_file) != 0)
     {
         printf(ERROR"ERROR -> New link must not exist.\n"RESET);
-
+        iput(mip);
         return -2;
     }
 
@@ -88,7 +88,7 @@ int my_unlink(char *pathname)
     if(S_ISDIR(ip->i_mode))
     {
         printf(ERROR"ERROR -> File provided is a directory.\n"RESET);
-
+        iput(mip);
         return -1;
     }
 
