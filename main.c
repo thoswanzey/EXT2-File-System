@@ -134,7 +134,7 @@ int main(int argc, char *argv[ ])
   
   // WRTIE code here to create P1 as a USER process
   while(1){
-    printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink|touch|stat|chmod]\n" BOLD "input command : "RESET);
+    printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink\n|touch|stat|chmod|cp|mv|cat|open|close|read|write]\n" BOLD "input command : "RESET);
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
 
@@ -182,6 +182,16 @@ int main(int argc, char *argv[ ])
        my_cp(pathname, pathname_2);
     else if (strcmp(cmd, "mv")==0) 
        my_mv(pathname, pathname_2);
+    else if (strcmp(cmd, "cat")==0) 
+       my_cat(pathname);
+    else if (strcmp(cmd, "open")==0) 
+       open_file(pathname, atoi(pathname_2));
+    else if (strcmp(cmd, "close")==0) 
+       close_file(atoi(pathname));
+    else if (strcmp(cmd, "read")==0)
+       read_file(atoi(pathname), atoi(pathname_2));
+    else if (strcmp(cmd, "write")==0) 
+       write_file(atoi(pathname), pathname_2);
     else
        printf("Invalid Command!\n");
   }
