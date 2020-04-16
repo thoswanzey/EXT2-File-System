@@ -10,6 +10,7 @@
 #include <libgen.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <errno.h>
 
 #include "type.h"
 #include "global.c"
@@ -29,6 +30,7 @@
 #include "pfd.c"
 #include "read.c"
 #include "cat.c"
+#include "write.c"
 #include "cp.c"
 #include "mv.c"
 
@@ -131,7 +133,8 @@ int main(int argc, char *argv[ ])
   printf("root refCount = %d\n", root->refCount);
 
   // WRTIE code here to create P1 as a USER process
-  
+   write_file(open_file("test", 2), "hi123456789");
+
   while(1){
     printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink|touch|stat|chmod]\n" BOLD "input command : "RESET);
     fgets(line, 128, stdin);
@@ -141,6 +144,8 @@ int main(int argc, char *argv[ ])
        continue;
     pathname[0] = 0;
     pathname_2[0] = 0;
+   
+
 
     sscanf(line, "%s %s %s", cmd, pathname, pathname_2);
     printf("cmd=%s pathname=%s pathname2=%s\n", cmd, pathname, pathname_2);
