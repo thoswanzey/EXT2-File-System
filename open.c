@@ -153,7 +153,6 @@ int open_file(char *path, int mode)
     if(mode != MODE_R)  mip->INODE.i_mtime = mip->INODE.i_atime;
 
     mip->dirty = 1;
-    iput(mip);
     //return FD
     return j;
 }
