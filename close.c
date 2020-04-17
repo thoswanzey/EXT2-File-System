@@ -21,7 +21,7 @@ int close_file(int fd)
 
     //If file no longer accessed by anything, free minode
     iput(oftp->mptr);
-    oft->mptr = NULL;
-    oft->offset = 0;
+    oftp->mptr = NULL;
+    oftp->offset = 0;
     return 0;
 }
