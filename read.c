@@ -2,33 +2,13 @@
 
 extern PROC *running;
 
-int read_file(int fd, int nbytes)
-{
-    int bytes_read;
-
-    char buf[nbytes];
-
-    if(fd < 0 || fd > NFD)
-    {
-        printf("File descriptor provided is not valid.");
-        return -1;
-    }
-    
-    bytes_read = my_read(fd, buf, nbytes);
-
-    printf("%s\n", buf);
-
-    return bytes_read;
-} 
-
-
 int my_read(int fd, char buf[], int nbytes)
 {
     MINODE *mip;
     OFT *oftp;
     int *indirect, *d_indirect;
 
-    int avil, blk, lbk, dblk, startByte, remain, count = 0;
+    int min, avil, blk, lbk, dblk, startByte, remain, count = 0;
 
     char readbuf[BLKSIZE];
     int buf_12[256], buf_13[256], dbuf[256];
@@ -80,25 +60,44 @@ int my_read(int fd, char buf[], int nbytes)
         get_block(mip->dev, blk, readbuf);
 
         cp = readbuf + startByte;
-        remain = BLKSIZE - startByte;
+        remain = BLKSIZE - startByte; // number of bytes that remain in readbuf
 
-        // reading one byte at a time
-        while(remain > 0)
-        {
-            *cq++ = *cp++;
-            oftp->offset++;
-            count++;
-            avil--;
-            nbytes--;
-            remain--;
-            if (nbytes <= 0 || avil <= 0)
-                break;
-        }
+        // number of bytes to copy
+        min = (avil < remain && avil < nbytes) ? avil : (remain < nbytes) ? remain : nbytes; 
+        char tempbuf[BLKSIZE];
+
+        // copy bytes, adjust offset
+        strncpy(tempbuf, cp, min);
+        strcat(cq, tempbuf);
+        oftp->offset += min;
+        count+=min;
+        avil-=min;
+        nbytes-=min;
+        remain-=min; 
 
     }
 
-    printf("READ: read %d bytes from file descriptor %d\n", count, fd);
+    if(count > 0)
+        printf("READ: read %d bytes from file descriptor %d\n", count, fd);
 
     return count;
 }
 
+int read_file(int fd, int nbytes)
+{
+    int bytes_read;
+
+    char buf[nbytes];
+
+    if(fd < 0 || fd > NFD)
+    {
+        printf("File descriptor provided is not valid.");
+        return -1;
+    }
+    
+    bytes_read = my_read(fd, buf, nbytes);
+
+    printf("%s\n", buf);
+
+    return bytes_read;
+} 
