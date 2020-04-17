@@ -2,7 +2,7 @@
 
 extern PROC *running;
 
-int my_read(int fd, char buf[], int nbytes)
+int my_read(int fd, char buf[], int nbytes, int verbose)
 {
     MINODE *mip;
     OFT *oftp;
@@ -76,7 +76,7 @@ int my_read(int fd, char buf[], int nbytes)
 
     }
 
-    if(count > 0)
+    if(verbose > 0 && count > 0)
         printf("READ: read %d bytes from file descriptor %d\n", count, fd);
 
     return count;
@@ -94,7 +94,7 @@ int read_file(int fd, int nbytes)
         return -1;
     }
     
-    bytes_read = my_read(fd, buf, nbytes);
+    bytes_read = my_read(fd, buf, nbytes, 1);
 
     printf("%s\n", buf);
 
