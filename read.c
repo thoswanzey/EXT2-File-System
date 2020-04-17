@@ -10,7 +10,7 @@ int my_read(int fd, char buf[], int nbytes)
 
     int min, avil, blk, lbk, dblk, startByte, remain, count = 0;
 
-    char readbuf[BLKSIZE];
+    char readbuf[BLKSIZE], tempbuf[BLKSIZE];
     int buf_12[256], buf_13[256], dbuf[256];
 
     char *cq, *cp;
@@ -64,7 +64,6 @@ int my_read(int fd, char buf[], int nbytes)
 
         // number of bytes to copy
         min = (avil < remain && avil < nbytes) ? avil : (remain < nbytes) ? remain : nbytes; 
-        char tempbuf[BLKSIZE];
 
         // copy bytes, adjust offset
         strncpy(tempbuf, cp, min);

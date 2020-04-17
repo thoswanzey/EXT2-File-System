@@ -1,19 +1,5 @@
 /************* write.c file **************/
 
-int write_file(int fd, char *str)
-{
-    char buf[256];
-
-    if(fd < 0 || fd > NFD)
-    {
-        printf("File descriptor provided is not valid.");
-        return -1;
-    }
-
-    strcpy(buf, str);
-
-    return my_write(fd, buf, strlen(buf));
-}
 
 int my_write(int fd, char buf[], int nbytes)
 {
@@ -22,7 +8,7 @@ int my_write(int fd, char buf[], int nbytes)
 
     int avil, blk, lbk, dblk, startByte, remain, count = 0;
 
-    char writebuf[BLKSIZE];
+    char writebuf[BLKSIZE], tempbuf[BLKSIZE];
     int buf_12[256], buf_13[256], dbuf[256];
 
     char *cq, *cp;
@@ -108,20 +94,15 @@ int my_write(int fd, char buf[], int nbytes)
         cp = writebuf + startByte;
         remain = BLKSIZE - startByte;
 
-        // writing one byte at a time
-        while(remain > 0)
+        strncpy(tempbuf, cq, nbytes);
+        strcat(cp, tempbuf);
+        count+=nbytes;
+        nbytes+=nbytes;
+        remain-=nbytes;
+        // oftp->offset+=nbytes;
+        if(oftp->offset > mip->INODE.i_size)
         {
-            *cp++ = *cq++;
-            count++;
-            nbytes--;
-            remain--;
-            oftp->offset++;
-            if(oftp->offset > mip->INODE.i_size)
-            {
-                mip->INODE.i_size++;
-            }
-
-            if(nbytes <= 0) break;
+            mip->INODE.i_size+=nbytes;
         }
 
         put_block(mip->dev, blk, writebuf);
@@ -131,4 +112,19 @@ int my_write(int fd, char buf[], int nbytes)
     printf("wrote %d bytes into file descriptor fd=%d\n", count, fd);
 
     return nbytes;
+}
+
+int write_file(int fd, char *str)
+{
+    char buf[256];
+
+    if(fd < 0 || fd > NFD)
+    {
+        printf("File descriptor provided is not valid.");
+        return -1;
+    }
+
+    strcpy(buf, str);
+
+    return my_write(fd, buf, strlen(buf));
 }
