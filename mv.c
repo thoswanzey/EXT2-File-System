@@ -2,8 +2,12 @@
 
 int my_mv(char *src, char*dest)
 {
-    char destination[256], temp[256], sourceFileName[64];
+    char destination[256], sourceFileName[64];
     int src_ino, dest_ino, src_dev, dest_dev;
+
+    strcpy(destination, dest);
+    strcpy(sourceFileName, src);
+    strcpy(sourceFileName, basename(sourceFileName));
 
     if(!strcmp(src, "") || !strcmp(dest, "")){
         printf(ERROR"ERROR -> Either the source or destination file was not specified\n"RESET);
@@ -30,8 +34,7 @@ int my_mv(char *src, char*dest)
         //If a directory, add src file name to destination path
         if(S_ISDIR(mip->INODE.i_mode))
         {
-            strcpy(destination, dest);
-            strcat(destination, "/");
+            if(destination[strlen(destination) - 1] != '/') strcat(destination, "/");
             strcat(destination, sourceFileName);
         }
         iput(mip);

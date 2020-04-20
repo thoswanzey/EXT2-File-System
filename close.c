@@ -20,7 +20,8 @@ int close_file(int fd)
     if(oftp->refCount > 0) return 0;
 
     //If file no longer accessed by anything, free minode
-    MINODE *mip = oftp->mptr;
-    iput(mip);
+    iput(oftp->mptr);
+    oftp->mptr = NULL;
+    oftp->offset = 0;
     return 0;
 }

@@ -2,7 +2,11 @@
 
 int my_cp(char *src, char*dest)
 {
-    char destination[256], temp[256], sourceFileName[64];
+    char destination[256], sourceFileName[256];
+
+    strcpy(destination, dest);
+    strcpy(sourceFileName, src);
+    strcpy(sourceFileName, basename(sourceFileName));
 
     if(!strcmp(src, "") || !strcmp(dest, "")){
         printf(ERROR"ERROR -> Either the source or destination file was not specified\n"RESET);
@@ -27,14 +31,13 @@ int my_cp(char *src, char*dest)
         //If a directory, add src file name to destination path
         if(S_ISDIR(mip->INODE.i_mode))
         {
-            strcpy(destination, dest);
             strcat(destination, "/");
             strcat(destination, sourceFileName);
         }
         iput(mip);
     }
 
-    int fd, gd;
+    int fd, gd, n;
     char buf[BLKSIZE];
     fd = open_file(src, MODE_R);
     if(fd < 0){
@@ -43,7 +46,7 @@ int my_cp(char *src, char*dest)
     }
 
     //If destination file doesn't exist already, open_file will create it (for all write modes)
-    gd = open_file(dest, MODE_RW);
+    gd = open_file(destination, MODE_RW);
 
     while(n = my_read(fd, buf, BLKSIZE, 1))
     {

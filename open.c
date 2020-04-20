@@ -83,7 +83,10 @@ int open_file(char *path, int mode)
     OFT * findOFT = NULL;
     for(int i = 0; i < NOFT; i++)
     {
-        if(oft[i].refCount == 0 && !findOFT)   findOFT = &oft[i];
+        if(oft[i].refCount == 0)
+        {
+            if(!findOFT) findOFT = &oft[i];
+        }
         else if(oft[i].mptr == mip)
         {
             //If already open and not in read mode
@@ -150,7 +153,6 @@ int open_file(char *path, int mode)
     if(mode != MODE_R)  mip->INODE.i_mtime = mip->INODE.i_atime;
 
     mip->dirty = 1;
-    iput(mip);
     //return FD
     return j;
 }
