@@ -33,6 +33,7 @@
 #include "write.c"
 #include "cp.c"
 #include "mv.c"
+#include "verify.c"
 
 int init()
 {
@@ -192,6 +193,8 @@ int main(int argc, char *argv[ ])
        read_file(atoi(pathname), atoi(pathname_2));
     else if (strcmp(cmd, "write")==0) 
        write_file(atoi(pathname), pathname_2);
+   else if (strcmp(cmd, "verify")==0) 
+       verify_blocks(pathname);
     else
        printf("Invalid Command!\n");
   }
