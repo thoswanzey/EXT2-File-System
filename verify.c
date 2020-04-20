@@ -77,7 +77,7 @@ int verify_blocks(char *path)
     }
     get_block(mip->dev, mip->INODE.i_block[13], buf_13);
     for(int i = 0; i < 256; i++){
-        dblk = buf_13[i/256];
+        dblk = buf_13[i];
         if(dblk == 0){
             iput(mip);
             return 12 + 256 + 256*i;
