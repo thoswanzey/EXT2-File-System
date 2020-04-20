@@ -66,8 +66,7 @@ int my_read(int fd, char buf[], int nbytes, int verbose)
         min = (avil < remain && avil < nbytes) ? avil : (remain < nbytes) ? remain : nbytes; 
 
         // copy bytes, adjust offset
-        strncpy(tempbuf, cp, min);
-        strcat(cq, tempbuf);
+        strncpy(cq, cp, min);
         oftp->offset += min;
         count+=min;
         avil-=min;

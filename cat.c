@@ -14,7 +14,6 @@ int my_cat(char *path)
 
     while(n = my_read(fd, mybuf, BLKSIZE, 0)){
         write(1, mybuf, n);
-        bzero(mybuf, BLKSIZE); // clear buffer, otherwise stack overflow
     }
 
     close_file(fd);

@@ -51,7 +51,6 @@ int my_cp(char *src, char*dest)
     while(n = my_read(fd, buf, BLKSIZE, 1))
     {
         my_write(gd, buf, n);
-        bzero(buf, BLKSIZE);
     }
 
     close_file(fd);
