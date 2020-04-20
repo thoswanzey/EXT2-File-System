@@ -48,9 +48,10 @@ int my_cp(char *src, char*dest)
     //If destination file doesn't exist already, open_file will create it (for all write modes)
     gd = open_file(destination, MODE_RW);
 
-    while(n = my_read(fd, buf, BLKSIZE))
+    while(n = my_read(fd, buf, BLKSIZE, 1))
     {
         my_write(gd, buf, n);
+        // bzero(buf, BLKSIZE);
     }
 
     close_file(fd);

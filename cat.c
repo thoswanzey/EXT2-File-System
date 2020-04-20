@@ -12,8 +12,9 @@ int my_cat(char *path)
         return -1;
     }
 
-    while(n = my_read(fd, mybuf, BLKSIZE)){
+    while(n = my_read(fd, mybuf, BLKSIZE, 0)){
         write(1, mybuf, n);
+        bzero(mybuf, BLKSIZE); // clear buffer, otherwise stack overflow
     }
 
     close_file(fd);
