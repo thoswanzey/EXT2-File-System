@@ -103,7 +103,7 @@ int verify_blocks(char *path)
             }
         }
     }
-    iput(mip)
+    iput(mip);
     return 12 + 256 + 256*256;
 }
 
