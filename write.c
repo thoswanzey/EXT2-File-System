@@ -6,7 +6,7 @@ int my_write(int fd, char buf[], int nbytes)
     MINODE *mip;
     OFT *oftp;
 
-    int avil, blk, lbk, dblk, startByte, remain, count = 0;
+    int avil, blk, lbk, dblk, startByte;
 
     char writebuf[BLKSIZE], tempbuf[BLKSIZE];
     int buf_12[256], buf_13[256], dbuf[256];
@@ -90,9 +90,8 @@ int my_write(int fd, char buf[], int nbytes)
     get_block(mip->dev, blk, writebuf);
 
     cp = writebuf + startByte;
-    remain = BLKSIZE - startByte;
 
-    strncpy(cp, cq, nbytes);
+    strcpy(cp, cq);
     oftp->offset+=nbytes;
     if(oftp->offset > mip->INODE.i_size)
     {
@@ -102,7 +101,7 @@ int my_write(int fd, char buf[], int nbytes)
     put_block(mip->dev, blk, writebuf);
 
     mip->dirty = 1;
-    printf("wrote %d bytes into file descriptor fd=%d\n", count, fd);
+    printf("wrote %d bytes into file descriptor fd=%d\n", nbytes, fd);
 
     return nbytes;
 }
