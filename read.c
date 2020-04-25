@@ -6,7 +6,6 @@ int my_read(int fd, char buf[], int nbytes, int verbose)
 {
     MINODE *mip;
     OFT *oftp;
-    int *indirect, *d_indirect;
 
     int min, avil, blk, lbk, dblk, startByte, remain, count = 0;
 
@@ -38,8 +37,9 @@ int my_read(int fd, char buf[], int nbytes, int verbose)
         {
             get_block(mip->dev, mip->INODE.i_block[12], buf_12);
 
-            indirect = (int*)buf_12 + lbk - 12;
-            blk = *indirect;
+            lbk -= 12;
+            
+            blk = buf_12[lbk];
         }
         // DOUBLE INDIRECT
         else
