@@ -84,7 +84,7 @@ int mount(char *pathname, char *mp)
 
     // mark mount point as mounted
     mip->mounted = 1;
-
+    mip->mptr = &mtable[mounted_count];
     mounted_count++;
 
     return 0;

@@ -24,13 +24,19 @@ DIR   *dp;
 
 #define SUPER_USER  0
 
+typedef struct mt{
+    int dev;
+    MINODE *mptr;
+    char name[64];
+}MTABLE;
+
 typedef struct minode{
   INODE INODE;
   int dev, ino;
   int refCount;
   int dirty;
   int mounted;
-  struct mntable *mptr;
+  MTABLE *mptr;
 }MINODE;
 
 typedef struct oft{
