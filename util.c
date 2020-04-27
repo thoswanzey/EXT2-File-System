@@ -275,3 +275,100 @@ int my_truncate(MINODE * mip)
    mip->INODE.i_size = 0;
    mip->dirty = 1;
 }
+
+
+int my_access(char *pathname, char mode) // mode ='r', 'w', 'x' 
+{
+   unsigned short check_mode;
+   int ino = getino(pathname);
+   if(!ino){
+      printf(ERROR"ERROR -> File does not exist\n"RESET);
+      return 0;
+   }
+
+   if (running->uid == SUPER_USER) return 1;
+
+   MINODE * mip = iget(dev, ino);
+
+   switch(mode){
+      case 'r':
+         check_mode = 1 << 2;
+         break;
+      case 'w':
+         check_mode = 1 << 1;
+         break;
+      case 'x':
+         check_mode = 1;
+         break;
+      default:
+         printf(ERROR"ERROR -> Invalid mode\n"RESET);
+         return 0;
+   }
+
+   //Check for user permission if user
+   if(mip->INODE.i_uid == running->uid && (mip->INODE.i_mode & (check_mode << 6))){
+      iput(mip);
+      return 1;
+   }
+
+   //Check for group permission if in group
+   if(mip->INODE.i_gid == running->gid && (mip->INODE.i_mode & (check_mode << 3))){
+      iput(mip);
+      return 1;
+   }
+
+   //Check for other permission
+   if(mip->INODE.i_mode & check_mode){
+      iput(mip);
+      return 1;
+   }
+
+   iput(mip);
+   return 0;
+}
+
+
+int my_maccess(MINODE *mip, char mode) // mode ='r', 'w', 'x' 
+{  
+   unsigned short check_mode;
+
+   if (running->uid == SUPER_USER) return 1;
+
+   mip->refCount++;
+
+   switch(mode){
+      case 'r':
+         check_mode = 1 << 2;
+         break;
+      case 'w':
+         check_mode = 1 << 1;
+         break;
+      case 'x':
+         check_mode = 1;
+         break;
+      default:
+         printf(ERROR"ERROR -> Invalid mode\n"RESET);
+         return 0;
+   }
+
+   //Check for user permission if user
+   if(mip->INODE.i_uid == running->uid && (mip->INODE.i_mode & (check_mode << 6))){
+      iput(mip);
+      return 1;
+   }
+
+   //Check for group permission if in group
+   if(mip->INODE.i_gid == running->gid && (mip->INODE.i_mode & (check_mode << 3))){
+      iput(mip);
+      return 1;
+   }
+
+   //Check for other permission
+   if(mip->INODE.i_mode & check_mode){
+      iput(mip);
+      return 1;
+   }
+
+   iput(mip);
+   return 0;
+}

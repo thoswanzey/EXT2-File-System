@@ -48,8 +48,24 @@ int my_link(char *old_file, char *new_file)
     strcpy(child, basename(temp)); // basename destroys path
 
     pino = getino(parent);
+
+    if(!pino)
+    {
+        printf(ERROR"ERROR -> Specified directory for new link does not exist.\n"RESET);
+        iput(mip);
+        return -3;
+    }
+
     pmip = iget(dev, pino);
     pip = &pmip->INODE;
+
+    if(!my_maccess(pmip, 'w'))
+    {
+        printf(ERROR"ERROR -> You do not have write permission in the specified link directory\n"RESET);
+        iput(mip);
+        iput(pmip);
+        return -4;
+    }
 
     enter_name(pmip, ino, child); // add hard link entry
 
@@ -82,14 +98,20 @@ int my_unlink(char *pathname)
     }
 
     mip = iget(dev, ino);
-
     ip = &mip->INODE;
+
+    if(!my_maccess(mip, 'w'))
+    {
+        printf(ERROR"ERROR -> You do not have permission to unlink this file\n"RESET);
+        iput(mip);
+        return -2;
+    }
 
     if(S_ISDIR(ip->i_mode))
     {
         printf(ERROR"ERROR -> File provided is a directory.\n"RESET);
         iput(mip);
-        return -1;
+        return -3;
     }
 
     strcpy(buf, pathname);

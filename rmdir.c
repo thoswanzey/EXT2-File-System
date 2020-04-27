@@ -88,8 +88,10 @@ int my_rmdir(char * path){
     }
 
     mip = iget(dev, ino);
-    if(mip->INODE.i_uid != running->uid && running->uid != 0){
-        printf(ERROR"ERROR -> You do not have permission to do this\n"RESET);
+
+    if(!my_maccess(mip, 'w'))
+    {
+        printf(ERROR"ERROR -> You do not have permission to remove this directory\n"RESET);
         iput(mip);
         return -3;
     }
@@ -97,6 +99,7 @@ int my_rmdir(char * path){
     if(mip->refCount > 1)
     {
         printf(ERROR"ERROR -> MINODE is busy\n"RESET);
+        iput(mip);
         return -4;
     }
 
