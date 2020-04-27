@@ -283,7 +283,7 @@ int my_access(char *pathname, char mode) // mode ='r', 'w', 'x'
    int ino = getino(pathname);
    if(!ino){
       printf(ERROR"ERROR -> File does not exist\n"RESET);
-      return -1;
+      return 0;
    }
 
    if (running->uid == SUPER_USER) return 1;
@@ -302,7 +302,7 @@ int my_access(char *pathname, char mode) // mode ='r', 'w', 'x'
          break;
       default:
          printf(ERROR"ERROR -> Invalid mode\n"RESET);
-         return -2;
+         return 0;
    }
 
    //Check for user permission if user
@@ -348,7 +348,7 @@ int my_maccess(MINODE *mip, char mode) // mode ='r', 'w', 'x'
          break;
       default:
          printf(ERROR"ERROR -> Invalid mode\n"RESET);
-         return -2;
+         return 0;
    }
 
    //Check for user permission if user
