@@ -6,13 +6,6 @@
 #define MODE_RW         2
 #define MODE_APPEND     3
 
-#define PERMISSIONS_USER    0700
-#define PERMISSIONS_GROUP   070
-#define PERMISSIONS_OTHER   07
-
-#define PERMISSIONS_R   0444
-#define PERMISSIONS_W   0222
-#define PERMISSIONS_X   0111
 
 int open_file(char *path, int mode)
 {
@@ -53,14 +46,11 @@ int open_file(char *path, int mode)
         return -4;
     }
 
-    int permissionBits = PERMISSIONS_OTHER;
-    if(mip->INODE.i_gid == running->gid) permissionBits |= PERMISSIONS_GROUP;
-    if(mip->INODE.i_uid == running->uid) permissionBits |= PERMISSIONS_USER;
 
     //Check for read permission if necessary
     if(mode == MODE_R || mode == MODE_RW)
     {
-        if(!(permissionBits & PERMISSIONS_R & mip->INODE.i_mode) && mip->INODE.i_uid != SUPER_USER)
+        if(!my_maccess(mip, 'r'))
         {
             printf(ERROR"ERROR -> You do not have permission to do this\n"RESET);
             iput(mip);
@@ -71,7 +61,7 @@ int open_file(char *path, int mode)
     //Check for write permission if necessary
     if(mode == MODE_W || mode == MODE_APPEND || mode == MODE_RW)
     {
-        if(!(permissionBits & PERMISSIONS_W & mip->INODE.i_mode) && mip->INODE.i_uid != SUPER_USER)
+        if(!my_maccess(mip, 'w'))
         {
             printf(ERROR"ERROR -> You do not have permission to do this\n"RESET);
             iput(mip);

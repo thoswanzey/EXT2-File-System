@@ -41,6 +41,13 @@ int my_chmod(char * path, char * mode)
 
     MINODE * mip = iget(dev, ino);
 
+    if(running->uid != mip->INODE.i_uid)
+    {
+        printf(ERROR"ERROR -> Only the owner can change permissions\n"RESET);
+        iput(mip);
+        return -3;
+    }
+
     mip->INODE.i_mode |= newMode;
     mip->dirty = 1;
     iput(mip);
