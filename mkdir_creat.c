@@ -142,6 +142,7 @@ int my_mkdir(MINODE *pip, char *child)
   return 0;
 }
 
+
 int make_dir(char *path) 
 { 
   char buf[128], parent[128], child[128], temp[128];
@@ -162,18 +163,28 @@ int make_dir(char *path)
   if(pino < 1)
   {
     printf(ERROR"ERROR -> Specified parent directory does not exits"RESET);
+    return -1;
   }
 
   pmip = iget(dev, pino);
 
+  if(!my_maccess(pmip, 'w'))
+  {
+    printf(ERROR"ERROR -> You do not have write permission in this directory\n"RESET);
+    iput(pmip);
+    return -2;
+  }
+
   if(!S_ISDIR(pmip->INODE.i_mode))
   {
     printf(ERROR"ERROR -> Filepath does not point to a directory\n"RESET);
+    iput(pmip);
     return -2;
   }
 
   if(getino(path)){
     printf(ERROR"ERROR -> Directory already exists\n"RESET);
+    iput(pmip);
     return -3;
   }
 
@@ -187,6 +198,7 @@ int make_dir(char *path)
 
   return 0;
 }
+
 
 int my_creat(MINODE *pmip, char *child)
 {
@@ -216,6 +228,7 @@ int my_creat(MINODE *pmip, char *child)
   return ino;
 }
 
+
 int create_file(char *path) 
 { 
   char buf[128], parent[128], child[128], temp[128];
@@ -233,22 +246,31 @@ int create_file(char *path)
   int pino;
 
   pino = getino(parent);
-  pmip = iget(dev, pino);
-
-  if(!pmip){
+ 
+  if(!pino){
     printf(ERROR"ERROR -> Provided parent directory does exists!\n"RESET);
     return -1;
+  }
+
+  if(getino(path)){
+    printf(ERROR"ERROR -> File already exists!\n"RESET);
+    return -2;
+  }
+
+  pmip = iget(dev, pino);
+
+  if(!my_maccess(pmip, 'w'))
+  {
+    printf(ERROR"ERROR -> You do not have write permission in this directory\n"RESET);
+    iput(pmip);
+    return -3;
   }
 
   if(!S_ISDIR(pmip->INODE.i_mode))
   {
     printf(ERROR"ERROR -> Provided parent directory is not a directory!\n"RESET);
-    return -2;
-  }
-
-  if(getino(path)){
-    printf(ERROR"ERROR -> File already exists!\n"RESET);
-    return -3;
+    iput(pmip);
+    return -4;
   }
 
   my_creat(pmip, child);
