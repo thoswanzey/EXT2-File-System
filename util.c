@@ -295,12 +295,14 @@ int my_access(char *pathname, char mode) // mode ='r', 'w', 'x'
          return 1;
    }
 
-   if (running->uid == SUPER_USER) return 1;
    int ino = getino(pathname);
    if(!ino){
       printf(ERROR"ERROR -> File does not exist\n"RESET);
       return -2;
    }
+
+   if (running->uid == SUPER_USER) return 1;
+
    MINODE * mip = iget(dev, ino);
 
    //Check for user permission if user
@@ -343,6 +345,9 @@ int my_maccess(MINODE *mip, char mode) // mode ='r', 'w', 'x'
          printf(ERROR"ERROR -> Invalid mode\n"RESET);
          return 1;
    }
+
+   if (running->uid == SUPER_USER) return 1;
+
    mip->refCount++;
 
    //Check for user permission if user
