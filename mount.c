@@ -28,15 +28,15 @@ int mount(char *pathname, char *mp)
     {
         for(int i = 0; i <= MT_SIZE; i++)
         {
-            if(mtable[i].name != 0)
-                printf(ERROR"MOUNTED FS: %s, device: %d\n"RESET, mtable[i].name, mtable[i].dev);
+            if(mtable[i].dev != 0)
+                printf(ERROR"MOUNTED FS: %s, device: %d\n"RESET, mtable[i].devName, mtable[i].dev);
         }
     }
 
     // check to see if mounted FS already exists
     for(int i = 0; i <= MT_SIZE; i++)
     {
-        if(!strcmp(mtable[i].name, pathname))
+        if(mtable[i].dev > 0 && !strcmp(mtable[i].devName, pathname))
         {
             printf(ERROR"MOUNTED FS: %s, already exists!\n"RESET, pathname);
             return -1;
@@ -74,16 +74,19 @@ int mount(char *pathname, char *mp)
     // check to see if mount point is DIR and not busy
     if(!S_ISDIR(mip->INODE.i_mode) || running->cwd == mip){
         printf(ERROR"provied mount point is not a directory or it is busy\n"RESET);
+        iput(mip);
         return -4;
     }
 
     // store new mount table entry data
     mtable[mounted_count].dev = fd;
-    strcpy(mtable[mounted_count].name, pathname);
+    strcpy(mtable[mounted_count].devName, pathname);
 
     // mark mount point as mounted
     mip->mounted = 1;
     mip->mptr = &mtable[mounted_count];
+    mtable[mounted_count].mntDirPtr = mip;
+    
     mounted_count++;
 
     return 0;

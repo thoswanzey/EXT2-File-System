@@ -31,14 +31,29 @@ typedef struct minode{
   int refCount;
   int dirty;
   int mounted;
-  struct mt *mptr;
+  struct mtable *mptr;
 }MINODE;
-
+/*
 typedef struct mt{
     int dev;
     MINODE *mptr;
     char name[64];
 }MTABLE;
+*/
+typedef struct mtable{
+    int dev;
+    int ninodes;
+    int nblocks;
+    int free_blocks;
+    int free_inodes;
+    int bmap;
+    int imap;
+    int iblock;
+    MINODE *mntDirPtr;
+    char devName[64];
+    char mntName[64];
+}MTABLE;
+
 
 typedef struct oft{
   int  mode;
