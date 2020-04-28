@@ -149,10 +149,11 @@ int search(MINODE *mip, char *name)
 
 int getino(char *pathname)
 {
-  int i, ino, blk, disp, pino;
-  char buf[BLKSIZE], temp[BLKSIZE], child[BLKSIZE], parent[BLKSIZE];
+  int i, j, ino, blk, disp, pino;
+  char buf[BLKSIZE], temp[BLKSIZE], child[BLKSIZE], parent[BLKSIZE], *cp;
   INODE *ip;
   MINODE *mip, *newmip;
+  DIR *dp;
 
   printf("getino: pathname=%s\n", pathname);
   if (strcmp(pathname, "/")==0)
@@ -181,13 +182,37 @@ int getino(char *pathname)
      if((strcmp(name[i], "..")) == 0 && (mip->dev != root->dev) && (mip->ino == 2))
      {
         printf("UP cross mounting point\n");
-        ino = getino(child);
-        newmip = iget(dev, ino);
 
+        // Find entry in mount table
+        for(j = 0; i < MT_SIZE; i++)
+        {
+           if(mtable[i].dev  == dev)
+           {
+              break;
+           }
+        }
+        newmip = mtable[i].mntDirPtr;
         iput(mip);
+      
+        get_block(newmip->dev, newmip->INODE.i_block[0], buf); //First block contains . and .. entries
+        dp = (DIR*)buf;
+        cp = (char *)buf;
+        strncpy(temp, dp->name, dp->name_len);
+        temp[dp->name_len] = 0; // add null terminating character
+        while(strcmp(temp, ".."))
+        {
+           if((cp + dp->rec_len) >= (buf + BLKSIZE))
+           {
+              printf(ERROR"Can't find partent directory\n"RESET);
+              return 0;
+           }
+           cp += dp->rec_len;
+           dp = (DIR *)cp;
+           strncpy(temp, dp->name, dp->name_len);
+           temp[dp->name_len] = 0; // add null terminating character
+        }
         
-        pino = getino(parent);
-        mip = iget(dev, pino);
+        mip = iget(dev, dp->inode);
 
         dev = newmip->dev;
         continue;
@@ -216,7 +241,7 @@ int getino(char *pathname)
    }
 
   iput(mip);                   // release mip  
-   return ino;
+   return mip->ino;
 }
 
 int findmyname(MINODE *parent, u32 myino, char *myname) 

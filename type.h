@@ -16,6 +16,7 @@ DIR   *dp;
 #define FREE        0
 #define READY       1
 
+#define MT_SIZE  16
 #define BLKSIZE  1024
 #define NMINODE   128
 #define NFD        16
@@ -33,13 +34,8 @@ typedef struct minode{
   int mounted;
   struct mtable *mptr;
 }MINODE;
-/*
-typedef struct mt{
-    int dev;
-    MINODE *mptr;
-    char name[64];
-}MTABLE;
-*/
+
+
 typedef struct mtable{
     int dev;
     int ninodes;

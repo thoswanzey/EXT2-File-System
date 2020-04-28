@@ -1,7 +1,4 @@
-#define MT_SIZE 16
-
-MTABLE mtable[MT_SIZE];
-int mounted_count;
+/*********** mount.c file ****************/
 
 int mount_init()
 {   
@@ -9,7 +6,7 @@ int mount_init()
     mounted_count = 0;
 
     // set all file systems to free
-    for(int i = 0; i <= MT_SIZE; i++)
+    for(int i = 0; i < MT_SIZE; i++)
     {
         mtable[i].dev = 0;
     }
@@ -26,7 +23,7 @@ int mount(char *pathname, char *mp)
     // if mount point is null, print current mounted file systems
     if(mp[0] == 0)
     {
-        for(int i = 0; i <= MT_SIZE; i++)
+        for(int i = 0; i < MT_SIZE; i++)
         {
             if(mtable[i].dev != 0)
                 printf(ERROR"MOUNTED FS: %s, device: %d\n"RESET, mtable[i].devName, mtable[i].dev);
@@ -34,7 +31,7 @@ int mount(char *pathname, char *mp)
     }
 
     // check to see if mounted FS already exists
-    for(int i = 0; i <= MT_SIZE; i++)
+    for(int i = 0; i < MT_SIZE; i++)
     {
         if(mtable[i].dev > 0 && !strcmp(mtable[i].devName, pathname))
         {
@@ -81,6 +78,7 @@ int mount(char *pathname, char *mp)
     // store new mount table entry data
     mtable[mounted_count].dev = fd;
     strcpy(mtable[mounted_count].devName, pathname);
+    strcpy(mtable[mounted_count].mntName, mp);
 
     // mark mount point as mounted
     mip->mounted = 1;
