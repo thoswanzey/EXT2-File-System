@@ -16,6 +16,7 @@ DIR   *dp;
 #define FREE        0
 #define READY       1
 
+#define MT_SIZE  16
 #define BLKSIZE  1024
 #define NMINODE   128
 #define NFD        16
@@ -24,14 +25,31 @@ DIR   *dp;
 
 #define SUPER_USER  0
 
+
 typedef struct minode{
   INODE INODE;
   int dev, ino;
   int refCount;
   int dirty;
   int mounted;
-  struct mntable *mptr;
+  struct mtable *mptr;
 }MINODE;
+
+
+typedef struct mtable{
+    int dev;
+    int ninodes;
+    int nblocks;
+    int free_blocks;
+    int free_inodes;
+    int bmap;
+    int imap;
+    int iblock;
+    MINODE *mntDirPtr;
+    char devName[64];
+    char mntName[64];
+}MTABLE;
+
 
 typedef struct oft{
   int  mode;

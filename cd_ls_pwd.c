@@ -15,6 +15,7 @@ int ch_dir(char *pathname)
   MINODE *mip = iget(dev, ino);
   if(!S_ISDIR(mip->INODE.i_mode)){
 	printf(ERROR"ERROR -> not a directory!\n"RESET);
+	iput(mip);
   	return -1;
   }
   iput(running->cwd);

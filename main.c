@@ -34,6 +34,7 @@
 #include "cp.c"
 #include "mv.c"
 #include "verify.c"
+#include "mount.c"
 
 int init()
 {
@@ -133,6 +134,8 @@ int main(int argc, char *argv[ ])
   running->cwd = iget(dev, 2);
   printf("root refCount = %d\n", root->refCount);
   
+  mount_init();
+
   // WRTIE code here to create P1 as a USER process
   while(1){
     printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink\n|touch|stat|chmod|cp|mv|cat|open|close|read|write]\n" BOLD "input command : "RESET);
@@ -193,8 +196,10 @@ int main(int argc, char *argv[ ])
        read_file(atoi(pathname), atoi(pathname_2));
     else if (strcmp(cmd, "write")==0) 
        write_file(atoi(pathname), pathname_2);
-   else if (strcmp(cmd, "verify")==0) 
+    else if (strcmp(cmd, "verify")==0) 
        verify_blocks(pathname);
+    else if (strcmp(cmd, "mount")==0) 
+       mount(pathname, pathname_2);
     else
        printf("Invalid Command!\n");
   }
