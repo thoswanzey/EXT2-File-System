@@ -59,7 +59,7 @@ int mount(char *pathname, char *mp)
     // checking to see if valid EXT2 FS
     get_block(fd, 1, buf);
 
-    sp_temp = (SUPER *)sp_temp;
+    sp_temp = (SUPER *)buf;
 
     if (sp_temp->s_magic != 0xEF53)
     {
@@ -68,7 +68,7 @@ int mount(char *pathname, char *mp)
     }
 
     // find ino, get minode of mount point     
-    ino = getino(pathname);
+    ino = getino(mp);
     mip = iget(dev, ino);
 
     // check to see if mount point is DIR and not busy
@@ -80,7 +80,6 @@ int mount(char *pathname, char *mp)
     // store new mount table entry data
     mtable[mounted_count].dev = fd;
     strcpy(mtable[mounted_count].name, pathname);
-    mtable[mounted_count].mptr = mip;
 
     // mark mount point as mounted
     mip->mounted = 1;

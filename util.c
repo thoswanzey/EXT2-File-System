@@ -3,7 +3,7 @@ extern int  dev;
 extern char gpath[128];
 extern char *name[32];
 extern int n;
-extern PROC *running;;
+extern PROC *running;
 extern MINODE minode[NMINODE];
 extern MINODE *root;
 extern int inode_start;
@@ -149,10 +149,10 @@ int search(MINODE *mip, char *name)
 
 int getino(char *pathname)
 {
-  int i, ino, blk, disp;
-  char buf[BLKSIZE];
+  int i, ino, blk, disp, pino;
+  char buf[BLKSIZE], temp[BLKSIZE], child[BLKSIZE], parent[BLKSIZE];
   INODE *ip;
-  MINODE *mip;
+  MINODE *mip, *newmip;
 
   printf("getino: pathname=%s\n", pathname);
   if (strcmp(pathname, "/")==0)
@@ -168,10 +168,33 @@ int getino(char *pathname)
   
   tokenize(pathname);
 
+   strcpy(buf, pathname);
+
+   strcpy(temp, buf);
+   strcpy(parent, dirname(temp)); // dirname destroys path
+
+   strcpy(temp, buf);
+   strcpy(child, basename(temp)); // basename destroys path
+
+
   for (i=0; i<n; i++){
+     if((strcmp(name[i], "..")) == 0 && (mip->dev != root->dev) && (mip->ino == 2))
+     {
+        printf("UP cross mounting point\n");
+        ino = getino(child);
+        newmip = iget(dev, ino);
+
+        iput(mip);
+        
+        pino = getino(parent);
+        mip = iget(dev, pino);
+
+        dev = newmip->dev;
+        continue;
+     }
       printf("===========================================\n");
       printf("getino: i=%d name[%d]=%s\n", i, i, name[i]);
- 
+      
       ino = search(mip, name[i]);
 
       if (ino==0){
@@ -181,6 +204,15 @@ int getino(char *pathname)
       }
       iput(mip);                // release current mip
       mip = iget(dev, ino);     // get next mip
+
+      if(mip->mounted)
+      {
+         printf("DOWN cross mounting point\n");
+         iput(mip);
+
+         dev = mip->mptr->dev;
+         mip = iget(dev, 2);
+      }
    }
 
   iput(mip);                   // release mip  
