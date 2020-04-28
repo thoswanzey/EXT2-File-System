@@ -54,7 +54,7 @@ int mount(char *pathname, char *mp)
     mtable[mounted_count].dev = 0;
  
     // get fd of virtual disk
-    fd = open_file(pathname, MODE_RW);
+    fd = open(pathname, O_RDWR);
 
     // checking to see if valid EXT2 FS
     get_block(fd, 1, buf);
