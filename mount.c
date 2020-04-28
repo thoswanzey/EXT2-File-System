@@ -86,5 +86,7 @@ int mount(char *pathname, char *mp)
     mip->mptr = &mtable[mounted_count];
     mounted_count++;
 
+    iput(mip);
+
     return 0;
 }
