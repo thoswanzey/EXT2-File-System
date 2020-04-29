@@ -81,11 +81,12 @@ typedef struct proc{
     #define RESET "\x1B[0m"
     #define BOLD  "\033[1m"
 
-    #define ERROR       BOLD RED
+    #define ERROR       BOLD RED 
     #define WARNING     BOLD YEL
 
 #endif // COLOR_H
 
+/*________________FUNCTIONS________________*/
 
 //**************alloc.c**************
 int tst_bit(char *buf, int bit);
@@ -124,9 +125,9 @@ int my_lseek(int fd, int position);
 //**************mkdir_creat.c**************
 int enter_name(MINODE *pmip, int myino, char *myname);
 int my_mkdir(MINODE *pip, char *child);
-int make_dir(char *path) ;
+int make_dir(char *path);
 int my_creat(MINODE *pmip, char *child);
-int create_file(char *path) ;
+int create_file(char *path);
 
 //**************mount.c**************
 int mount_init();
@@ -159,6 +160,9 @@ int my_readlink(char *pathname, char buf[]);
 //**************touch.c**************
 int my_touch(char * path);
 
+//**************umount.c**************
+int umount(char *pathname);
+
 //**************util.c**************
 int get_block(int dev, int blk, char *buf);
 int put_block(int dev, int blk, char *buf);
@@ -167,6 +171,7 @@ MINODE *iget(int dev, int ino);
 void iput(MINODE *mip);
 int search(MINODE *mip, char *name);
 int getino(char *pathname);
+MINODE * iget_mp(char *pathname);
 int findmyname(MINODE *parent, u32 myino, char *myname);
 int findino(MINODE *mip, u32 *myino);
 int my_truncate(MINODE * mip);

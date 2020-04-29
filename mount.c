@@ -2,9 +2,6 @@
 
 int mount_init()
 {   
-    // keeps track of how many file systems are mounted
-    mounted_count = 0;
-
     // set all file systems to free
     for(int i = 0; i < MT_SIZE; i++)
     {
@@ -15,19 +12,28 @@ int mount_init()
 int mount(char *pathname, char *mp)
 {
 
-    int ino, fd;
+    int ino, fd, mounted_count = -1;
     MINODE *mip;
     char buf[BLKSIZE];
     SUPER *sp_temp;
 
     // if mount point is null, print current mounted file systems
-    if(mp[0] == 0)
+    if(mp[0] == 0 || pathname[0] == 0)
     {
+        printf(BOLD BLU"\n    Device Name    | Dev Number | Mount Point\n"RESET);
         for(int i = 0; i < MT_SIZE; i++)
         {
             if(mtable[i].dev != 0)
-                printf(ERROR"MOUNTED FS: %s, device: %d\n"RESET, mtable[i].devName, mtable[i].dev);
+                printf("%-19s"BOLD BLU"| "RESET"%-11d"BOLD BLU"| "RESET"[%d, %d]\n", mtable[i].devName, mtable[i].dev, mtable[i].mntDirPtr->dev, mtable[i].mntDirPtr->ino);
         }
+        putchar('\n');
+        return 0;
+    }
+
+    if(running->uid != SUPER_USER)
+    {
+        printf(ERROR"ERROR -> Only root can do that\n"RESET);
+        return -1;
     }
 
     // check to see if mounted FS already exists
@@ -36,19 +42,21 @@ int mount(char *pathname, char *mp)
         if(mtable[i].dev > 0 && !strcmp(mtable[i].devName, pathname))
         {
             printf(ERROR"MOUNTED FS: %s, already exists!\n"RESET, pathname);
-            return -1;
+            return -2;
+        }
+        if(mtable[i].dev == 0 && mounted_count == -1)
+        {
+            mounted_count = i;
         }
     }
     
     // check to make sure there is room in the mount table
-    if(mounted_count >= MT_SIZE)
+    if(mounted_count == -1)
     {
         printf(ERROR"MOUNT Table is full!\n"RESET);
-        return -2;
+        return -3;
     }
 
-    // allocate free mount table entry
-    mtable[mounted_count].dev = 0;
  
     // get fd of virtual disk
     fd = open(pathname, O_RDWR);
@@ -58,22 +66,37 @@ int mount(char *pathname, char *mp)
 
     sp_temp = (SUPER *)buf;
 
-    if (sp_temp->s_magic != 0xEF53)
+    if (sp_temp->s_magic != EXT2_SUPER_MAGIC)
     {
         printf(ERROR"magic = %x is not an ext2 filesystem\n"RESET, sp_temp->s_magic);
-        return -3;
+        return -4;
     }
 
     // find ino, get minode of mount point     
     ino = getino(mp);
+    if (!ino)
+    {
+        printf(ERROR"ERROR -> Mount point does not exist\n"RESET);
+        return -5;
+    }
+
     mip = iget(dev, ino);
 
-    // check to see if mount point is DIR and not busy
-    if(!S_ISDIR(mip->INODE.i_mode) || running->cwd == mip){
-        printf(ERROR"provied mount point is not a directory or it is busy\n"RESET);
+    // check to see if mount point is DIR
+    if(!S_ISDIR(mip->INODE.i_mode)){
+        printf(ERROR"provied mount point is not a directory\n"RESET);
         iput(mip);
-        return -4;
+        return -6;
     }
+
+    // check minode to see if it's being referenced anywhere else
+    if(mip->refCount > 1)
+    {
+        printf(ERROR"ERROR -> Mount point is busy\n"RESET);
+        iput(mip);
+        return -7;
+    }
+
 
     // store new mount table entry data
     mtable[mounted_count].dev = fd;
@@ -84,8 +107,6 @@ int mount(char *pathname, char *mp)
     mip->mounted = 1;
     mip->mptr = &mtable[mounted_count];
     mtable[mounted_count].mntDirPtr = mip;
-    
-    mounted_count++;
 
     return 0;
 }

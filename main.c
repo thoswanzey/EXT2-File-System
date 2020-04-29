@@ -84,6 +84,11 @@ int quit()
 {
   int i;
   MINODE *mip;
+  if(running->uid != SUPER_USER)
+  {
+    printf(ERROR"ERROR -> Only root can do that\n"RESET);
+    return -1;
+  }
   for (i=0; i<NMINODE; i++){
     mip = &minode[i];
     if (mip->refCount > 0)
