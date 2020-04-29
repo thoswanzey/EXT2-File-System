@@ -10,7 +10,7 @@ int rm_child(MINODE *pip, char *name){
 	{   
         //If no more blocks allocated, return
 		if(pip->INODE.i_block[i] == 0)
-			return;
+			return -1;
 
         get_block(pip->dev, pip->INODE.i_block[i], buf);
         cp = buf;
