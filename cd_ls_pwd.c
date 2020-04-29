@@ -155,20 +155,39 @@ void ls(char *pathname)
 
 char *pwd(MINODE *wd)
 {
-  char dirname[256];
+	char dirname[256], buf[BLKSIZE], temp[BLKSIZE], *cp;
+	int ino, pino, i;
+	DIR *dp;
+	MINODE *newmip, *pip;
 
-  if (wd == root){
-    printf("/");
-    return 0;
-  }
+	if ((wd->dev != root->dev) && (wd->ino == 2))
+	{
+        // Find entry in mount table
+        for(i = 0; i < MT_SIZE; i++)
+        {
+           if(mtable[i].dev  == dev)
+           {
+              break;
+           }
+        }
+        newmip = mtable[i].mntDirPtr;
+		ino = newmip->INODE.i_block[0];
+		pino = findino(newmip, &ino);
+		pip = iget(newmip->dev, pino);
+	}
+	else
+	{
+		if (wd == root){
+			printf("/");
+			return 0;
+		}
 
-  int parent_ino, my_ino;
-  my_ino = wd->INODE.i_block[0];
+		ino = wd->INODE.i_block[0];
+		pino = findino(wd, &ino);
+		pip = iget(wd->dev, pino);
+	}
 
-  parent_ino = findino(wd, &my_ino);
-
-  MINODE * pip = iget(wd->dev, parent_ino);
-  findmyname(pip, my_ino, dirname);
-  pwd(pip);
-  printf("%s/", dirname);
+	findmyname(pip, ino, dirname);
+	pwd(pip);
+	printf("%s/", dirname);
 }
