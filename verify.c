@@ -47,7 +47,7 @@ int verify_blocks(char *path)
         put_block(dev, bmap, bitMapBuf);
         printf(GRN BOLD"Set bno = %d as allocated\n"RESET, mip->INODE.i_block[12]);
     }
-    get_block(mip->dev, mip->INODE.i_block[12], buf_12);
+    get_block(mip->dev, mip->INODE.i_block[12], (char *)buf_12);
     for(int i = 0; i < 256; i++){
         // map logical lbk to physical blk
         blk = buf_12[i];
@@ -75,7 +75,7 @@ int verify_blocks(char *path)
         put_block(dev, bmap, bitMapBuf);
         printf(GRN BOLD"Set bno = %d as allocated\n"RESET, mip->INODE.i_block[13]);
     }
-    get_block(mip->dev, mip->INODE.i_block[13], buf_13);
+    get_block(mip->dev, mip->INODE.i_block[13], (char *)buf_13);
     for(int i = 0; i < 256; i++){
         dblk = buf_13[i];
         if(dblk == 0){
@@ -88,7 +88,7 @@ int verify_blocks(char *path)
             put_block(dev, bmap, bitMapBuf);
             printf(GRN BOLD"Set bno = %d as allocated\n"RESET, dblk);
         }
-        get_block(mip->dev, dblk, dbuf);
+        get_block(mip->dev, dblk, (char *)dbuf);
         for(int j = 0; j < 256; j++){
             blk = dbuf[j];
             if(blk == 0) {

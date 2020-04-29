@@ -74,7 +74,7 @@ int enter_name(MINODE *pmip, int myino, char *myname){
 
     get_block(dev, pblk, buf);
 
-    cp = (DIR*)buf;
+    dp = (DIR*)buf;
     cp = buf;
 
     printf("Directory Name = %s\n", dp->name);

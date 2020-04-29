@@ -8,16 +8,13 @@ extern MINODE minode[NMINODE];
 extern MINODE *root;
 extern int inode_start;
 
-int fd_is_valid(int fd)
-{
-   return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
-}
 
 int get_block(int dev, int blk, char *buf)
 {
    lseek(dev, (long)blk*BLKSIZE, 0);
    read(dev, buf, BLKSIZE);
 }   
+
 int put_block(int dev, int blk, char *buf)
 {
    lseek(dev, (long)blk*BLKSIZE, 0);
@@ -220,6 +217,13 @@ int getino(char *pathname)
       printf("===========================================\n");
       printf("getino: i=%d name[%d]=%s\n", i, i, name[i]);
       
+      if(!my_maccess(mip, 'x'))
+      {
+         printf(ERROR"ERROR -> ACCESS DENIED\n"RESET);
+         iput(mip);
+         return 0;
+      }
+
       ino = search(mip, name[i]);
 
       if (ino==0){
@@ -310,16 +314,16 @@ int my_truncate(MINODE * mip)
       }
       else if(lbk >= 12 && lbk < 12 + 256){
          if(!mip->INODE.i_block[12]) break;
-         get_block(mip->dev, mip->INODE.i_block[12], buf);
+         get_block(mip->dev, mip->INODE.i_block[12], (char *)buf);
          bno = buf[lbk-12];
       }
       else if(lbk >= 12 + 256 && lbk < 12 + 256 + 256*256)
       {
          if(!mip->INODE.i_block[13]) break;
-         get_block(mip->dev, mip->INODE.i_block[13], buf);
+         get_block(mip->dev, mip->INODE.i_block[13], (char *)buf);
          iblk = (lbk - (12 + 256)) / 256;
          if(!buf[iblk]) break;
-         get_block(mip->dev, buf[iblk], buf2);
+         get_block(mip->dev, buf[iblk], (char *)buf2);
          diblk = (lbk - (12 + 256)) % 256;
          bno = buf2[diblk];
       }
@@ -332,6 +336,7 @@ int my_truncate(MINODE * mip)
    mip->INODE.i_size = 0;
    mip->dirty = 1;
 }
+
 
 
 int my_access(char *pathname, char mode) // mode ='r', 'w', 'x' 

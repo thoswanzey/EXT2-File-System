@@ -35,7 +35,7 @@ int my_read(int fd, char buf[], int nbytes, int verbose)
         // INDIRECT
         else if (lbk >= 12 && lbk < (256+12))
         {
-            get_block(mip->dev, mip->INODE.i_block[12], buf_12);
+            get_block(mip->dev, mip->INODE.i_block[12], (char *)buf_12);
 
             lbk -= 12;
             
@@ -46,11 +46,11 @@ int my_read(int fd, char buf[], int nbytes, int verbose)
         {
             lbk -= (12 + 256);
 
-            get_block(mip->dev, mip->INODE.i_block[13], buf_13);
+            get_block(mip->dev, mip->INODE.i_block[13], (char *)buf_13);
 
             dblk = buf_13[lbk/256];
 
-            get_block(mip->dev, dblk, dbuf);
+            get_block(mip->dev, dblk, (char *)dbuf);
 
             blk = dbuf[lbk%256];
 

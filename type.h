@@ -85,3 +85,98 @@ typedef struct proc{
     #define WARNING     BOLD YEL
 
 #endif // COLOR_H
+
+
+//**************alloc.c**************
+int tst_bit(char *buf, int bit);
+int set_bit(char *buf, int bit);
+void clr_bit(char *buf, int bit);
+int idalloc(int dev, int ino);
+int bdalloc(int dev, int blk);
+int ialloc(int dev);
+int balloc(int dev);
+
+//**************cat.c**************
+int my_cat(char *path);
+
+//**************cd_ls_pwd.c**************
+int ch_dir(char *pathname);
+void print_info(MINODE *mip, char *name);
+void print_directory(MINODE *mip);
+void ls(char *pathname);
+
+//**************chmod.c**************
+int my_chmod(char * path, char * mode);
+
+//**************close.c**************
+int close_file(int fd);
+
+//**************cp.c**************
+int my_cp(char *src, char*dest);
+
+//**************link_unlink.c**************
+int my_link(char *old_file, char *new_file);
+int my_unlink(char *pathname);
+
+//**************lseek.c**************
+int my_lseek(int fd, int position);
+
+//**************mkdir_creat.c**************
+int enter_name(MINODE *pmip, int myino, char *myname);
+int my_mkdir(MINODE *pip, char *child);
+int make_dir(char *path) ;
+int my_creat(MINODE *pmip, char *child);
+int create_file(char *path) ;
+
+//**************mount.c**************
+int mount_init();
+int mount(char *pathname, char *mp);
+
+//**************mv.c**************
+int my_mv(char *src, char*dest);
+
+//**************open.c**************
+int open_file(char *path, int mode);
+
+//**************pfd.c**************
+int my_pfd(void);
+
+//**************read.c**************
+int my_read(int fd, char buf[], int nbytes, int verbose);
+int read_file(int fd, int nbytes);
+
+//**************rmdir.c**************
+int rm_child(MINODE *pip, char *name);
+int my_rmdir(char * path);
+
+//**************stat.c**************
+int my_stat(char * path);
+
+//**************symlink.c**************
+int my_symlink(char *old_file, char *new_file);
+int my_readlink(char *pathname, char buf[]);
+
+//**************touch.c**************
+int my_touch(char * path);
+
+//**************util.c**************
+int get_block(int dev, int blk, char *buf);
+int put_block(int dev, int blk, char *buf);
+int tokenize(char *pathname);
+MINODE *iget(int dev, int ino);
+void iput(MINODE *mip);
+int search(MINODE *mip, char *name);
+int getino(char *pathname);
+int findmyname(MINODE *parent, u32 myino, char *myname);
+int findino(MINODE *mip, u32 *myino);
+int my_truncate(MINODE * mip);
+int my_access(char *pathname, char mode);
+int my_maccess(MINODE *mip, char mode);
+
+
+//**************verify.c**************
+int verify_blocks(char *path);
+
+//**************write.c**************
+int my_write(int fd, char buf[], int nbytes);
+int write_file(int fd, char *str);

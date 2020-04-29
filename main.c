@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "type.h"
 #include "global.c"
