@@ -13,3 +13,30 @@ int   n;         // number of component strings
 
 int fd, dev;
 int nblocks, ninodes, bmap, imap, inode_start; // disk parameters
+
+char * commands[] = {"ls",
+                     "cd",
+                     "pwd",
+                     "quit",
+                     "mkdir",
+                     "creat",
+                     "rmdir",
+                     "link",
+                     "unlink",
+                     "symlink",
+                     "touch",
+                     "stat",
+                     "chmod",
+                     "pfd",
+                     "cp",
+                     "mv",
+                     "cat",
+                     "open",
+                     "close",
+                     "read",
+                     "write",
+                     "verify",
+                     "mount",
+                     "umount",
+                     "sw",
+                     ""};
