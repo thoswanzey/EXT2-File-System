@@ -36,6 +36,7 @@
 #include "mv.c"
 #include "verify.c"
 #include "mount.c"
+#include "umount.c"
 
 int init()
 {
@@ -216,6 +217,8 @@ int main(int argc, char *argv[ ])
        mount(pathname, pathname_2);
    else if (strcmp(cmd, "sw")==0) 
        my_sw();
+   else if (strcmp(cmd, "umount")==0)
+      umount(pathname);
     else
        printf("Invalid Command!\n");
   }
