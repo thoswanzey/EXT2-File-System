@@ -58,7 +58,7 @@ int mount(char *pathname, char *mp)
 
     sp_temp = (SUPER *)buf;
 
-    if (sp_temp->s_magic != 0xEF53)
+    if (sp_temp->s_magic != EXT2_SUPER_MAGIC)
     {
         printf(ERROR"magic = %x is not an ext2 filesystem\n"RESET, sp_temp->s_magic);
         return -3;
@@ -66,13 +66,19 @@ int mount(char *pathname, char *mp)
 
     // find ino, get minode of mount point     
     ino = getino(mp);
+    if (!ino)
+    {
+        printf(ERROR"ERROR -> Mount point does not exist\n"RESET);
+        return -4;
+    }
+
     mip = iget(dev, ino);
 
     // check to see if mount point is DIR and not busy
     if(!S_ISDIR(mip->INODE.i_mode) || running->cwd == mip){
         printf(ERROR"provied mount point is not a directory or it is busy\n"RESET);
         iput(mip);
-        return -4;
+        return -5;
     }
 
     // store new mount table entry data

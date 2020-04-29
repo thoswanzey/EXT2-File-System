@@ -162,6 +162,8 @@ int getino(char *pathname)
   else
      mip = running->cwd;
 
+  dev = mip->dev;
+
   mip->refCount++;         // because we iput(mip) later
   
   tokenize(pathname);
@@ -181,7 +183,7 @@ int getino(char *pathname)
         printf("UP cross mounting point\n");
 
         // Find entry in mount table
-        for(j = 0; i < MT_SIZE; i++)
+        for(j = 0; j < MT_SIZE; j++)
         {
            if(mtable[i].dev  == dev)
            {
@@ -248,6 +250,113 @@ int getino(char *pathname)
    return mip->ino;
 }
 
+
+MINODE * iget_mp(char *pathname)
+{
+  int i, j, ino, blk, disp, pino;
+  char buf[BLKSIZE], temp[BLKSIZE], child[BLKSIZE], parent[BLKSIZE], *cp;
+  INODE *ip;
+  MINODE *mip, *newmip;
+  DIR *dp;
+
+  printf("getino: pathname=%s\n", pathname);
+  if (strcmp(pathname, "/")==0)
+      return root;
+  
+  // starting mip = root OR CWD
+  if (pathname[0]=='/')
+     mip = root;
+  else
+     mip = running->cwd;
+
+  dev = mip->dev;
+
+  mip->refCount++;         // because we iput(mip) later
+  
+  tokenize(pathname);
+
+   strcpy(buf, pathname);
+
+   strcpy(temp, buf);
+   strcpy(parent, dirname(temp)); // dirname destroys path
+
+   strcpy(temp, buf);
+   strcpy(child, basename(temp)); // basename destroys path
+
+
+  for (i=0; i<n; i++){
+     if((strcmp(name[i], "..")) == 0 && (mip->dev != root->dev) && (mip->ino == 2))
+     {
+        printf("UP cross mounting point\n");
+
+        // Find entry in mount table
+        for(j = 0; j < MT_SIZE; j++)
+        {
+           if(mtable[i].dev  == dev)
+           {
+              break;
+           }
+        }
+        newmip = mtable[i].mntDirPtr;
+        iput(mip);
+      
+        get_block(newmip->dev, newmip->INODE.i_block[0], buf); //First block contains . and .. entries
+        dp = (DIR*)buf;
+        cp = (char *)buf;
+        strncpy(temp, dp->name, dp->name_len);
+        temp[dp->name_len] = 0; // add null terminating character
+        while(strcmp(temp, ".."))
+        {
+           if((cp + dp->rec_len) >= (buf + BLKSIZE))
+           {
+              printf(ERROR"Can't find partent directory\n"RESET);
+              return 0;
+           }
+           cp += dp->rec_len;
+           dp = (DIR *)cp;
+           strncpy(temp, dp->name, dp->name_len);
+           temp[dp->name_len] = 0; // add null terminating character
+        }
+        
+        mip = iget(dev, dp->inode);
+
+        dev = newmip->dev;
+     }
+      printf("===========================================\n");
+      printf("getino: i=%d name[%d]=%s\n", i, i, name[i]);
+      
+      if(!my_maccess(mip, 'x'))
+      {
+         printf(ERROR"ERROR -> ACCESS DENIED\n"RESET);
+         iput(mip);
+         return 0;
+      }
+
+      ino = search(mip, name[i]);
+
+      if (ino==0){
+         iput(mip);
+         printf("name %s does not exist\n", name[i]);
+         return 0;
+      }
+      iput(mip);                // release current mip
+      mip = iget(dev, ino);     // get next mip
+
+      if(mip->mounted && i < n-1)
+      {
+         printf("DOWN cross mounting point\n");
+         iput(mip);
+
+         dev = mip->mptr->dev;
+         mip = iget(dev, 2);
+      }
+   }
+
+   iput(mip);                   // release mip  
+   return mip;
+}
+
+
 int findmyname(MINODE *parent, u32 myino, char *myname) 
 {
    INODE * IP;
@@ -266,7 +375,7 @@ int findmyname(MINODE *parent, u32 myino, char *myname)
    //assume only 12 blocks
    for(int i = 0; i<12; i++){
       if(ip->i_block[i]){
-         get_block(dev, ip->i_block[i], buf);
+         get_block(parent->dev, ip->i_block[i], buf);
          dp = (DIR *)buf;
          cp = buf;
          while(cp < buf + BLKSIZE){

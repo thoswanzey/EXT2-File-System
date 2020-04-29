@@ -23,7 +23,7 @@ int enter_name(MINODE *pmip, int myino, char *myname){
 
     printf("ideal = %d\nneed = %d\n", ideal_length, need_length);
 
-    get_block(dev, pblk, buf); // get current parent inode block
+    get_block(pmip->dev, pblk, buf); // get current parent inode block
 
     dp = (DIR*)buf; // cast current inode block as directory pointer
     cp = buf;
@@ -57,7 +57,7 @@ int enter_name(MINODE *pmip, int myino, char *myname){
 
       strcpy(dp->name, myname);
 
-      put_block(dev, pblk, buf); // write block back
+      put_block(pmip->dev, pblk, buf); // write block back
 
       return 0;
     }
@@ -65,14 +65,14 @@ int enter_name(MINODE *pmip, int myino, char *myname){
     //If we get here, there's not enough space in the allocated blocks, so allocate another
     printf("Block number = %d\n", i);
 
-    pblk = balloc(dev); // get the first available block for new inode
+    pblk = balloc(pmip->dev); // get the first available block for new inode
 
     iparent->i_block[i] = pblk;
 
     iparent->i_size += BLKSIZE;
     pmip->dirty = 1;
 
-    get_block(dev, pblk, buf);
+    get_block(pmip->dev, pblk, buf);
 
     dp = (DIR*)buf;
     cp = buf;
@@ -86,7 +86,7 @@ int enter_name(MINODE *pmip, int myino, char *myname){
 
     strcpy(dp->name, myname);
 
-    put_block(dev, pblk, buf); // write block
+    put_block(pmip->dev, pblk, buf); // write block
 
     return 0;
   }
@@ -97,10 +97,10 @@ int my_mkdir(MINODE *pip, char *child)
 {
   DIR *dp;
   char buf[BLKSIZE];
-  int ino = ialloc(dev);
-  int bno = balloc(dev);
+  int ino = ialloc(pip->dev);
+  int bno = balloc(pip->dev);
 
-  MINODE *mip = iget(dev,ino);
+  MINODE *mip = iget(pip->dev,ino);
   INODE *ip = &mip->INODE;
 
   ip->i_mode = 0x41ED;		// OR 040755: DIR type and permissions
@@ -121,7 +121,7 @@ int my_mkdir(MINODE *pip, char *child)
 
   //DIR created, time to add . and .. entries to allocated block
 
-  get_block(dev, bno, buf);//Read block from disk
+  get_block(pip->dev, bno, buf);//Read block from disk
   dp = (DIR*)buf;
 
   dp->inode = ino;
@@ -136,7 +136,7 @@ int my_mkdir(MINODE *pip, char *child)
   dp->name_len = strlen("..");
   dp->rec_len = 1012;//Rest of block
 
-  put_block(dev, bno, buf);//Write block back to disk
+  put_block(pip->dev, bno, buf);//Write block back to disk
   enter_name(pip, ino, child);//enter name into parent's directory
   
   return 0;
@@ -203,9 +203,9 @@ int make_dir(char *path)
 int my_creat(MINODE *pmip, char *child)
 {
   DIR *dp;
-  int ino = ialloc(dev);
+  int ino = ialloc(pmip->dev);
 
-  MINODE *mip = iget(dev,ino);
+  MINODE *mip = iget(pmip->dev,ino);
   INODE *ip = &mip->INODE;
 
   ip->i_mode = 0x81A4;		// OR 0100644: File type and permissions
@@ -252,12 +252,14 @@ int create_file(char *path)
     return -1;
   }
 
+  pmip = iget(dev, pino);
+
   if(getino(path)){
     printf(ERROR"ERROR -> File already exists!\n"RESET);
+    iput(pmip);
     return -2;
   }
 
-  pmip = iget(dev, pino);
 
   if(!my_maccess(pmip, 'w'))
   {

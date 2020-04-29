@@ -86,6 +86,7 @@ typedef struct proc{
 
 #endif // COLOR_H
 
+/*________________FUNCTIONS________________*/
 
 //**************alloc.c**************
 int tst_bit(char *buf, int bit);
@@ -159,6 +160,9 @@ int my_readlink(char *pathname, char buf[]);
 //**************touch.c**************
 int my_touch(char * path);
 
+//**************umount.c**************
+int umount(char *pathname);
+
 //**************util.c**************
 int get_block(int dev, int blk, char *buf);
 int put_block(int dev, int blk, char *buf);
@@ -167,6 +171,7 @@ MINODE *iget(int dev, int ino);
 void iput(MINODE *mip);
 int search(MINODE *mip, char *name);
 int getino(char *pathname);
+MINODE * iget_mp(char *pathname);
 int findmyname(MINODE *parent, u32 myino, char *myname);
 int findino(MINODE *mip, u32 *myino);
 int my_truncate(MINODE * mip);

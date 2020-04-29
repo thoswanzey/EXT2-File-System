@@ -78,7 +78,7 @@ void print_directory(MINODE *mip)
 		if(ip->i_block[i] == 0)
 			break;
 
-		get_block(dev, ip->i_block[i], buf);
+		get_block(mip->dev, ip->i_block[i], buf);
 		dp = (DIR*)buf;
 		cp = buf;
 
@@ -87,7 +87,7 @@ void print_directory(MINODE *mip)
 			strncpy(temp_str, dp->name, dp->name_len);
 			temp_str[dp->name_len] = 0;
 
-			temp_mip = iget(dev, dp->inode);
+			temp_mip = iget(mip->dev, dp->inode);
 			if(temp_mip)
 			{
 				print_info(temp_mip, temp_str);
@@ -167,7 +167,7 @@ char *pwd(MINODE *wd)
 
   parent_ino = findino(wd, &my_ino);
 
-  MINODE * pip = iget(dev, parent_ino);
+  MINODE * pip = iget(wd->dev, parent_ino);
   findmyname(pip, my_ino, dirname);
   pwd(pip);
   printf("%s/", dirname);
