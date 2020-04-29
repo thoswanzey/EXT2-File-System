@@ -434,3 +434,12 @@ int my_maccess(MINODE *mip, char mode) // mode ='r', 'w', 'x'
    iput(mip);
    return 0;
 }
+
+
+void my_sw(void)
+{
+   running->status = FREE;
+   running = running->next;
+   running->status = READY;
+   printf(BOLD YEL "Process %d is now active\n"RESET, running->pid);
+}

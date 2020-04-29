@@ -172,6 +172,7 @@ int findino(MINODE *mip, u32 *myino);
 int my_truncate(MINODE * mip);
 int my_access(char *pathname, char mode);
 int my_maccess(MINODE *mip, char mode);
+void my_sw(void);
 
 
 //**************verify.c**************

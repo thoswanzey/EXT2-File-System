@@ -68,6 +68,7 @@ int init()
     o->mptr = NULL;
     o->mode = 0;
   }
+  mount_init();
 }
 
 // load root INODE and set root pointer to it
@@ -75,6 +76,7 @@ int mount_root()
 {  
   printf("mount_root()\n");
   root = iget(dev, 2);
+  root->INODE.i_mode |= 0777;
 }
 
 int quit()
@@ -89,6 +91,25 @@ int quit()
   exit(0);
 }
 
+void create_users()
+{
+  printf("creating P0 as running process\n");
+  proc[0].uid = SUPER_USER;
+  proc[0].status = READY;
+  proc[0].next = &proc[1];
+  proc[0].cwd = iget(dev, 2);
+  proc[0].pid = 0;
+
+  printf("creating P1 as free process\n");
+  proc[1].uid = 1;
+  proc[1].status = FREE;
+  proc[1].next = &proc[0];
+  proc[1].cwd = iget(dev, 2);
+  proc[1].pid = 1;
+
+  printf("root refCount = %d\n", root->refCount);
+  running = &proc[0];
+}
 
 char *disk = "diskimage";
 int main(int argc, char *argv[ ])
@@ -128,16 +149,8 @@ int main(int argc, char *argv[ ])
   init();  
   mount_root();
   printf("root refCount = %d\n", root->refCount);
+  create_users();
 
-  printf("creating P0 as running process\n");
-  running = &proc[0];
-  running->status = READY;
-  running->cwd = iget(dev, 2);
-  printf("root refCount = %d\n", root->refCount);
-  
-  mount_init();
-
-  // WRTIE code here to create P1 as a USER process
   while(1){
     printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink\n|touch|stat|chmod|cp|mv|cat|open|close|read|write]\n" BOLD "input command : "RESET);
     fgets(line, 128, stdin);
@@ -201,6 +214,8 @@ int main(int argc, char *argv[ ])
        verify_blocks(pathname);
     else if (strcmp(cmd, "mount")==0) 
        mount(pathname, pathname_2);
+   else if (strcmp(cmd, "sw")==0) 
+       my_sw();
     else
        printf("Invalid Command!\n");
   }
