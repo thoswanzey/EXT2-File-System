@@ -36,9 +36,30 @@ int my_stat(char * path)
     }
 
     printf(")  Uid: %-10d Gid: %d\n", mip->INODE.i_uid, mip->INODE.i_gid);
-    printf("Access: %s\n",ctime((time_t *)&(mip->INODE.i_atime)));
-    printf("Modify: %s\n",ctime((time_t *)&mip->INODE.i_mtime));
-    printf("Change: %s\n",ctime((time_t *)&(mip->INODE.i_ctime)));
+
+    const time_t timeptr  = mip->INODE.i_atime;
+    const time_t timeptr2 = mip->INODE.i_mtime;
+    const time_t timeptr3 = mip->INODE.i_ctime;
+
+    char *time_str = ctime(&timeptr);
+    if(strlen(time_str)>0)
+        time_str[strlen(time_str) - 1] = 0; // remove carriage return
+
+    printf("Access: %s\n",time_str);
+
+    
+    time_str = ctime(&timeptr2);
+    if(strlen(time_str)>0)
+        time_str[strlen(time_str) - 1] = 0; // remove carriage return
+
+    printf("Modify: %s\n",time_str);
+
+    
+    time_str = ctime(&timeptr3);
+    if(strlen(time_str)>0)
+        time_str[strlen(time_str) - 1] = 0; // remove carriage return
+
+    printf("Change: %s\n",time_str);
 
     iput(mip);
     return 0;

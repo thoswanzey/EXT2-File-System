@@ -43,8 +43,8 @@ void print_info(MINODE *mip, char *name)
 		case 0x8000:  putchar('-');     break;
     default:      putchar('?');     break;
 	}
-
-  char *time_str = ctime((time_t*)&ip->i_mtime);
+	const time_t timeptr= mip->INODE.i_mtime;
+    char *time_str = ctime(&timeptr);
 
 	time_str[strlen(time_str) - 1] = 0; // remove carriage return
 
