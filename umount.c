@@ -7,12 +7,18 @@ int umount(char *pathname)
     int i, j, mounted_dev = 0;
     MINODE *mip;
     
+    if(running->uid != SUPER_USER)
+    {
+        printf(ERROR"ERROR -> Only root can do that\n"RESET);
+        return -1;
+    }
+
     //gets minode pointer without inc refcount
     MINODE *MPmip = iget_mp(pathname);
     if(!MPmip)
     {
-        printf("ERROR -> unable to find mount point\n"RESET);
-        return -1;
+        printf(ERROR"ERROR -> unable to find mount point\n"RESET);
+        return -2;
     }
 
     // search entries to find provided mount point
@@ -31,8 +37,8 @@ int umount(char *pathname)
 
     if(i == MT_SIZE)
     {
-        printf("Mounted filesystem: %s not found!\n", pathname);
-        return -2;
+        printf(ERROR"ERROR -> Mounted filesystem: %s not found!\n"RESET, pathname);
+        return -3;
     }
 
     // check list of minodes to see if mount point is currently busy or in use
@@ -40,8 +46,8 @@ int umount(char *pathname)
     {
         if(minode[j].dev == mounted_dev && minode[j].refCount > 0)
         {
-            printf("Mounted filesystem: %s is busy\n", pathname);
-            return -3;
+            printf(ERROR"ERROR -> Mounted filesystem: %s is busy\n"RESET, pathname);
+            return -4;
         }
     }
 

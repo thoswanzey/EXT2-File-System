@@ -81,7 +81,7 @@ typedef struct proc{
     #define RESET "\x1B[0m"
     #define BOLD  "\033[1m"
 
-    #define ERROR       BOLD RED
+    #define ERROR       BOLD RED 
     #define WARNING     BOLD YEL
 
 #endif // COLOR_H
@@ -108,6 +108,7 @@ void ls(char *pathname);
 int *rpwd(MINODE *wd);
 int *pwd(MINODE *wd);
 
+
 //**************chmod.c**************
 int my_chmod(char * path, char * mode);
 
@@ -127,9 +128,9 @@ int my_lseek(int fd, int position);
 //**************mkdir_creat.c**************
 int enter_name(MINODE *pmip, int myino, char *myname);
 int my_mkdir(MINODE *pip, char *child);
-int make_dir(char *path) ;
+int make_dir(char *path);
 int my_creat(MINODE *pmip, char *child);
-int create_file(char *path) ;
+int create_file(char *path);
 
 //**************mount.c**************
 int mount_init();

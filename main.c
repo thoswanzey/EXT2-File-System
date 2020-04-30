@@ -84,6 +84,11 @@ int quit()
 {
   int i;
   MINODE *mip;
+  if(running->uid != SUPER_USER)
+  {
+    printf(ERROR"ERROR -> Only root can do that\n"RESET);
+    return -1;
+  }
   for (i=0; i<NMINODE; i++){
     mip = &minode[i];
     if (mip->refCount > 0)
@@ -112,13 +117,29 @@ void create_users()
   running = &proc[0];
 }
 
-char *disk = "diskimage";
+
+void showCommands()
+{
+   putchar('\n');
+   for(int i = 0; strcmp(commands[i], ""); i++)
+   {
+      if(i>0 && i%9 == 0){
+         putchar('\n');
+      }
+      printf(GRN"["BOLD BLU"%-7s"RESET GRN"] "RESET, commands[i]);
+   }
+   putchar('\n');
+}
+
+
 int main(int argc, char *argv[ ])
 {
   int ino;
   char buf[BLKSIZE];
   char line[128], cmd[32], pathname[128], pathname_2[128];
- 
+
+  char *disk = (argc == 2)?argv[1]:"diskimage";
+
   printf("checking EXT2 FS ....");
   if ((fd = open(disk, O_RDWR)) < 0){
     printf("open %s failed\n", disk);
@@ -153,7 +174,8 @@ int main(int argc, char *argv[ ])
   create_users();
 
   while(1){
-    printf(GRN"\n[ls|cd|pwd|quit|mkdir|rmdir|create|link|unlink|symlink\n|touch|stat|chmod|cp|mv|cat|open|close|read|write]\n" BOLD "input command : "RESET);
+    showCommands();
+    printf(BOLD GRN"input command : "RESET);
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
 
@@ -187,8 +209,6 @@ int main(int argc, char *argv[ ])
        my_unlink(pathname);
     else if (strcmp(cmd, "symlink")==0) 
        my_symlink(pathname, pathname_2);
-    else if (strcmp(cmd, "symlink")==0) 
-       my_symlink(pathname, pathname_2);
     else if (strcmp(cmd, "touch")==0) 
        my_touch(pathname);
     else if (strcmp(cmd, "stat")==0) 
@@ -220,7 +240,7 @@ int main(int argc, char *argv[ ])
    else if (strcmp(cmd, "umount")==0)
       umount(pathname);
     else
-       printf("Invalid Command!\n");
+       printf(ERROR"Invalid Command!\n"RESET);
   }
 }
 
