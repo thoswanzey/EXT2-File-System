@@ -75,6 +75,7 @@ typedef struct proc{
     #define WHT   "\x1B[37m"
     #define RESET "\x1B[0m"
     #define BOLD  "\033[1m"
+    #define ULINE "\x1B[4m"
 
     #define ERROR       BOLD RED 
     #define WARNING     BOLD YEL

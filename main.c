@@ -140,15 +140,19 @@ int quit()
 
 void showCommands()
 {
+   int perRow = 9;
    putchar('\n');
-   for(int i = 0; strcmp(commands[i], ""); i++)
+   for(int i = 0; (i<perRow)?1:strcmp(commands[i - perRow], ""); i++)
    {
-      if(i>0 && i%9 == 0){
+      if(i>0 && i%perRow == 0){
          putchar('\n');
       }
-      printf(GRN"["BOLD BLU"%-7s"RESET GRN"] "RESET, commands[i]);
+      if(i < perRow)
+         printf(ULINE GRN"   "BOLD BLU"        "RESET"  ");
+      else
+         printf(ULINE GRN"[>|"BOLD BLU"%-7s]"RESET"  " , commands[i-perRow]);
    }
-   putchar('\n');
+   printf("\n\n");
 }
 
 

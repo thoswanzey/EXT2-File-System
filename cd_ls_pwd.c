@@ -31,6 +31,7 @@ void print_info(MINODE *mip, char *name)
 
   u16 uid    = ip->i_uid;           // owner uid
   u16 gid    = ip->i_gid;           // group id
+  u32 dev    = mip->dev;            // device number
   u32 size   = ip->i_size;          // size in bytes
   u16 mode   = ip->i_mode;          // DIR type, permissions
   u16 links  = ip->i_links_count;   // links count
@@ -53,7 +54,7 @@ void print_info(MINODE *mip, char *name)
     putchar(mode & (1 << (strlen(permission) - 1 - i)) ? permission[i] : '-');
   }
 
-	printf("%7hu %4hu %4d %4hu %8u %26s  %s", links, gid, uid, ino, size, time_str, name);
+	printf("%7hu %4hu %4d %4d %4hu %8u %26s  %s", links, gid, uid, dev, ino, size, time_str, name);
 
 	S_ISLNK(mode)?printf(" -> %s\n", (char *)ip->i_block):putchar('\n');
 
@@ -71,7 +72,7 @@ void print_directory(MINODE *mip)
 	INODE *ip = &mip->INODE;
 	MINODE *temp_mip;
 
-	printf(BOLD BLU"\n  MODE      LINKS  GID  UID  INO     SIZE          MODIFIED           NAME\n"RESET);
+	printf(BOLD BLU"\n  MODE      LINKS  GID  UID  DEV  INO     SIZE          MODIFIED           NAME\n"RESET);
 
 	for(i = 0; i < ip->i_size/1024; i++)
 	{
