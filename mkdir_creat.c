@@ -10,9 +10,9 @@ int enter_name(MINODE *pmip, int myino, char *myname){
   INODE *iparent = &pmip->INODE; // get parent inode
 
   int pblk = 0, remain = 0;
-  int ideal_length = 0, need_length = 0;
+  int ideal_length = 0, need_length = 0, i;
 
-  for(int i = 0; i < (iparent->i_size / BLKSIZE); i++)
+  for(i = 0; i < (iparent->i_size / BLKSIZE); i++)
   {
     if(iparent->i_block[i]==0)
       break;
@@ -61,10 +61,10 @@ int enter_name(MINODE *pmip, int myino, char *myname){
 
       return 0;
     }
-
+  }
     //If we get here, there's not enough space in the allocated blocks, so allocate another
     printf("Block number = %d\n", i);
-
+    
     pblk = balloc(pmip->dev); // get the first available block for new inode
 
     iparent->i_block[i] = pblk;
@@ -89,7 +89,6 @@ int enter_name(MINODE *pmip, int myino, char *myname){
     put_block(pmip->dev, pblk, buf); // write block
 
     return 0;
-  }
 }
 
 
