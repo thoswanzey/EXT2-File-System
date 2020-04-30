@@ -1,6 +1,11 @@
 /*************** global.c file ************************/
 MINODE minode[NMINODE];
 MINODE *root;
+SUPER *sp;
+GD    *gp;
+INODE *ip;
+DIR   *dp;   
+MTABLE *mp;
 
 OFT    oft[NOFT];
 PROC   proc[NPROC], *running;
