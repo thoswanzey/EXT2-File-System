@@ -50,8 +50,7 @@ int init()
   for (i=0; i<NPROC; i++){
     p = &proc[i];
     p->pid = i;
-    p->uid = p->gid = 0;
-    p->cwd = 0;
+    p->uid = p->gid = i;
     p->status = READY;
     for (j=0; j<NFD; j++)
       p->fd[j] = 0;

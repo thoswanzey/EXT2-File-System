@@ -2,3 +2,4 @@ cp FreshDisks/disk1 disk1
 cp FreshDisks/disk2 disk2
 cp FreshDisks/disk3.1 disk3.1
 cp FreshDisks/disk3.2 disk3.2
+cp FreshDisks/diskimage diskimage
