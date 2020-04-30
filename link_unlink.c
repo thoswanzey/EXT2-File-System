@@ -100,9 +100,9 @@ int my_unlink(char *pathname)
     mip = iget(dev, ino);
     ip = &mip->INODE;
 
-    if(!my_maccess(mip, 'w'))
+    if(running->uid != mip->INODE.i_uid)
     {
-        printf(ERROR"ERROR -> You do not have permission to unlink this file\n"RESET);
+        printf(ERROR"ERROR -> You do not own this file\n"RESET);
         iput(mip);
         return -2;
     }

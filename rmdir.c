@@ -89,9 +89,9 @@ int my_rmdir(char * path){
 
     mip = iget(dev, ino);
 
-    if(!my_maccess(mip, 'w'))
+    if(running->uid != mip->INODE.i_uid)
     {
-        printf(ERROR"ERROR -> You do not have permission to remove this directory\n"RESET);
+        printf(ERROR"ERROR -> You do not own this directory\n"RESET);
         iput(mip);
         return -3;
     }
