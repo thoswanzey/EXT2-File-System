@@ -153,7 +153,7 @@ void ls(char *pathname)
 	}
 }
 
-int *rpwd(MINODE *wd)
+int rpwd(MINODE *wd)
 {
 	char dirname[256];
 	int ino, pino, i;
@@ -181,14 +181,14 @@ int *rpwd(MINODE *wd)
 	findmyname(pip, ino, dirname);
 	rpwd(pip);
 	iput(pip);
-	printf("/%s", dirname);
+	printf(YEL"/%s"RESET, dirname);
 }
 
 
-int *pwd(MINODE *wd)
+int pwd(MINODE *wd)
 {
 	if (wd == root){
-		printf("/\n");
+		printf(YEL"/\n"RESET);
 	}
 	else
 	{
