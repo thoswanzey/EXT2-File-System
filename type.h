@@ -105,7 +105,9 @@ int ch_dir(char *pathname);
 void print_info(MINODE *mip, char *name);
 void print_directory(MINODE *mip);
 void ls(char *pathname);
-char *pwd(MINODE *wd);
+int *rpwd(MINODE *wd);
+int *pwd(MINODE *wd);
+
 
 //**************chmod.c**************
 int my_chmod(char * path, char * mode);
