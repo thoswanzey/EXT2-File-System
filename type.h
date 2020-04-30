@@ -93,9 +93,6 @@ int bdalloc(int dev, int blk);
 int ialloc(int dev);
 int balloc(int dev);
 
-//**************cat.c**************
-int my_cat(char *path);
-
 //**************cd_ls_pwd.c**************
 int ch_dir(char *pathname);
 void print_info(MINODE *mip, char *name);
@@ -107,18 +104,9 @@ int pwd(MINODE *wd);
 //**************chmod.c**************
 int my_chmod(char * path, char * mode);
 
-//**************close.c**************
-int close_file(int fd);
-
-//**************cp.c**************
-int my_cp(char *src, char*dest);
-
 //**************link_unlink.c**************
 int my_link(char *old_file, char *new_file);
 int my_unlink(char *pathname);
-
-//**************lseek.c**************
-int my_lseek(int fd, int position);
 
 //**************mkdir_creat.c**************
 int enter_name(MINODE *pmip, int myino, char *myname);
@@ -127,21 +115,24 @@ int make_dir(char *path);
 int my_creat(MINODE *pmip, char *child);
 int create_file(char *path);
 
-//**************mount.c**************
+//**************mount_umount.c**************
 int mount(char *pathname, char *mp);
+int umount(char *pathname);
 
 //**************mv.c**************
 int my_mv(char *src, char*dest);
 
-//**************open.c**************
+//**************open_close.c**************
 int open_file(char *path, int mode);
-
-//**************pfd.c**************
+int close_file(int fd);
+int my_lseek(int fd, int position);
 int my_pfd(void);
 
-//**************read.c**************
+
+//**************read_cat.c**************
 int my_read(int fd, char buf[], int nbytes, int verbose);
 int read_file(int fd, int nbytes);
+int my_cat(char *path);
 
 //**************rmdir.c**************
 int rm_child(MINODE *pip, char *name);
@@ -156,9 +147,6 @@ int my_readlink(char *pathname, char buf[]);
 
 //**************touch.c**************
 int my_touch(char * path);
-
-//**************umount.c**************
-int umount(char *pathname);
 
 //**************util.c**************
 int get_block(int dev, int blk, char *buf);
@@ -176,10 +164,10 @@ int my_access(char *pathname, char mode);
 int my_maccess(MINODE *mip, char mode);
 void my_sw(void);
 
-
 //**************verify.c**************
 int verify_blocks(char *path);
 
-//**************write.c**************
+//**************write_cp.c**************
 int my_write(int fd, char buf[], int nbytes);
 int write_file(int fd, char *str);
+int my_cp(char *src, char*dest);

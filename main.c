@@ -25,18 +25,12 @@
 #include "touch.c"
 #include "stat.c"
 #include "chmod.c"
-#include "open.c"
-#include "close.c"
-#include "lseek.c"
-#include "pfd.c"
-#include "read.c"
-#include "cat.c"
-#include "write.c"
-#include "cp.c"
+#include "open_close.c"
+#include "read_cat.c"
+#include "write_cp.c"
 #include "mv.c"
 #include "verify.c"
-#include "mount.c"
-#include "umount.c"
+#include "mount_umount.c"
 
 int init()
 {
@@ -140,7 +134,7 @@ int quit()
 
 void showCommands()
 {
-   int perRow = 9;
+   int perRow = 7;
    putchar('\n');
    for(int i = 0; (i<perRow)?1:strcmp(commands[i - perRow], ""); i++)
    {

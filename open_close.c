@@ -1,4 +1,4 @@
-/************* open.c file **************/
+/************* open_close.c file **************/
 
 
 #define MODE_R          0
@@ -145,4 +145,67 @@ int open_file(char *path, int mode)
     mip->dirty = 1;
     //return FD
     return j;
+}
+
+
+int close_file(int fd)
+{
+    if(fd < 0 || fd >= NFD){
+        printf(ERROR"ERROR -> Invalid file descriptor\n"RESET);
+        return -1;
+    }
+
+    if(!running->fd[fd]){
+        printf(ERROR"ERROR -> File descriptor does not exist\n"RESET);
+        return -2;
+    }
+
+    OFT *oftp = running->fd[fd];
+    running->fd[fd] = NULL;
+    oftp->refCount--;
+
+    //If file is accessed somewhere else, leave it
+    if(oftp->refCount > 0) return 0;
+
+    //If file no longer accessed by anything, free minode
+    iput(oftp->mptr);
+    oftp->mptr = NULL;
+    oftp->offset = 0;
+    return 0;
+}
+
+
+int my_lseek(int fd, int position)
+{
+    int initial_offset;
+    OFT *oftp = running->fd[fd];
+
+    if(!oftp){
+        printf(ERROR"ERROR -> fd does not exist\n"RESET);
+        return -1;
+    }
+
+    if(position > oftp->mptr->INODE.i_size || position < 0){
+        printf(ERROR"ERROR -> position is not within file bounds\n"RESET);
+        return -2;
+    }
+
+    initial_offset = oftp->offset;
+    oftp->offset = position;
+    return initial_offset;
+}
+
+
+int my_pfd(void)
+{
+    char * modes[] = {"READ", "WRITE", "READ/WRITE", "APPEND"};
+    printf(BOLD" fd      mode     offset     INODE\n"RESET);
+    printf("----  ----------  ------  -----------\n");
+    for( int i = 0; i < NFD; i++)
+    {
+        if(running->fd[i]){
+            printf("%-4d  %-10s  %-6d  [%-4d,%-4d]\n", i, modes[running->fd[i]->mode], running->fd[i]->offset, running->fd[i]->mptr->dev, running->fd[i]->mptr->ino);
+        }
+    }
+    return 0;
 }

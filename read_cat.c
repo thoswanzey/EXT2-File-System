@@ -1,4 +1,4 @@
-/************* read.c file **************/
+/************* read_cat.c file **************/
 
 extern PROC *running;
 
@@ -99,3 +99,23 @@ int read_file(int fd, int nbytes)
 
     return bytes_read;
 } 
+
+
+int my_cat(char *path)
+{
+    char mybuf[BLKSIZE];
+    int n, fd;
+
+    fd = open_file(path, MODE_R);
+    if(fd < 0)
+    {
+        printf(ERROR"ERROR -> Unable to open file\n"RESET);
+        return -1;
+    }
+
+    while(n = my_read(fd, mybuf, BLKSIZE, 0)){
+        write(1, mybuf, n);
+    }
+
+    close_file(fd);
+}

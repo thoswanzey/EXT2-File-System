@@ -51,7 +51,7 @@ int enter_name(MINODE *pmip, int myino, char *myname){
       dp = (DIR*)cp; // end of last entry
 
       dp->inode = myino; // set end of entry to provided inode
-      dp->rec_len = BLKSIZE - ((u32)cp - (u32)buf);
+      dp->rec_len = BLKSIZE - ((uintptr_t)cp - (uintptr_t)buf);
       dp->name_len = strlen(myname);
       dp->file_type = EXT2_FT_DIR;
 
