@@ -185,12 +185,12 @@ int getino(char *pathname)
         // Find entry in mount table
         for(j = 0; j < MT_SIZE; j++)
         {
-           if(mtable[i].dev  == dev)
+           if(mtable[j].dev  == dev)
            {
               break;
            }
         }
-        newmip = mtable[i].mntDirPtr;
+        newmip = mtable[j].mntDirPtr;
         iput(mip);
       
         get_block(newmip->dev, newmip->INODE.i_block[0], buf); //First block contains . and .. entries
@@ -292,12 +292,12 @@ MINODE * iget_mp(char *pathname)
         // Find entry in mount table
         for(j = 0; j < MT_SIZE; j++)
         {
-           if(mtable[i].dev  == dev)
+           if(mtable[j].dev  == dev)
            {
               break;
            }
         }
-        newmip = mtable[i].mntDirPtr;
+        newmip = mtable[j].mntDirPtr;
         iput(mip);
       
         get_block(newmip->dev, newmip->INODE.i_block[0], buf); //First block contains . and .. entries
