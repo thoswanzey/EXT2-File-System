@@ -58,10 +58,16 @@ int init()
     p->pid = i;
     p->uid = p->gid = 0;
     p->cwd = 0;
-    p->status = FREE;
+    p->status = READY;
     for (j=0; j<NFD; j++)
       p->fd[j] = 0;
+    p->next = &proc[i+1];
   }
+  running = proc[NPROC - 1].next = &proc[0];
+
+  for(i = 0; i<MT_SIZE; i++)
+    mtable[i].dev = 0;
+
   for (i=0; i<NOFT; i++){
     o = &oft[i];
     o->refCount = 0;
@@ -69,14 +75,49 @@ int init()
     o->mptr = NULL;
     o->mode = 0;
   }
-  mount_init();
 }
 
 // load root INODE and set root pointer to it
-int mount_root()
-{  
+int mount_root(char * rootdev)
+{
+  char buf[BLKSIZE];
   printf("mount_root()\n");
+  printf("checking EXT2 FS ....");
+  if ((fd = open(rootdev, O_RDWR)) < 0){
+    printf("open %s failed\n", rootdev);
+    exit(1);
+  }
+  dev = fd;    // fd is the global dev 
+
+  /********** read super block  ****************/
+  get_block(dev, 1, buf);
+  sp = (SUPER *)buf;
+
+  /* verify it's an ext2 file system ***********/
+  if (sp->s_magic != 0xEF53){
+      printf("magic = %x is not an ext2 filesystem\n", sp->s_magic);
+      exit(1);
+  }     
+  printf("EXT2 FS OK\n");
+
+  mp = &mtable[0];
+  mp->dev = dev;
+  ninodes = mp->ninodes = sp->s_inodes_count;
+  nblocks = mp->nblocks = sp->s_blocks_count;
+  strcpy(mp->devName, rootdev);
+  strcpy(mp->mntName, "/");
+  get_block(dev, 2, buf); 
+  gp = (GD *)buf;
+  
+  bmap = mp->bmap = gp->bg_block_bitmap;
+  imap = mp->imap = gp->bg_inode_bitmap;
+  inode_start = mp->iblock = gp->bg_inode_table;
+  printf("bmp=%d imap=%d inode_start = %d\n", bmap, imap, inode_start);
   root = iget(dev, 2);
+  mp->mntDirPtr = root;
+  root->mptr = mp;
+  for(int i = 0; i<NPROC;i++)
+    proc[i].cwd = iget(dev, 2);
   root->INODE.i_mode |= 0777;
 }
 
@@ -97,27 +138,6 @@ int quit()
   exit(0);
 }
 
-void create_users()
-{
-  printf("creating P0 as running process\n");
-  proc[0].uid = SUPER_USER;
-  proc[0].status = READY;
-  proc[0].next = &proc[1];
-  proc[0].cwd = iget(dev, 2);
-  proc[0].pid = 0;
-
-  printf("creating P1 as free process\n");
-  proc[1].uid = 1;
-  proc[1].status = FREE;
-  proc[1].next = &proc[0];
-  proc[1].cwd = iget(dev, 2);
-  proc[1].pid = 1;
-
-  printf("root refCount = %d\n", root->refCount);
-  running = &proc[0];
-}
-
-
 void showCommands()
 {
    putchar('\n');
@@ -134,44 +154,13 @@ void showCommands()
 
 int main(int argc, char *argv[ ])
 {
-  int ino;
-  char buf[BLKSIZE];
   char line[128], cmd[32], pathname[128], pathname_2[128];
 
   char *disk = (argc == 2)?argv[1]:"diskimage";
 
-  printf("checking EXT2 FS ....");
-  if ((fd = open(disk, O_RDWR)) < 0){
-    printf("open %s failed\n", disk);
-    exit(1);
-  }
-  dev = fd;    // fd is the global dev 
-
-  /********** read super block  ****************/
-  get_block(dev, 1, buf);
-  sp = (SUPER *)buf;
-
-  /* verify it's an ext2 file system ***********/
-  if (sp->s_magic != 0xEF53){
-      printf("magic = %x is not an ext2 filesystem\n", sp->s_magic);
-      exit(1);
-  }     
-  printf("EXT2 FS OK\n");
-  ninodes = sp->s_inodes_count;
-  nblocks = sp->s_blocks_count;
-
-  get_block(dev, 2, buf); 
-  gp = (GD *)buf;
-
-  bmap = gp->bg_block_bitmap;
-  imap = gp->bg_inode_bitmap;
-  inode_start = gp->bg_inode_table;
-  printf("bmp=%d imap=%d inode_start = %d\n", bmap, imap, inode_start);
-
   init();  
-  mount_root();
+  mount_root(disk);
   printf("root refCount = %d\n", root->refCount);
-  create_users();
 
   while(1){
     showCommands();
@@ -184,7 +173,6 @@ int main(int argc, char *argv[ ])
     pathname[0] = 0;
     pathname_2[0] = 0;
    
-
 
     sscanf(line, "%s %s %s", cmd, pathname, pathname_2);
     printf("cmd=%s pathname=%s pathname2=%s\n", cmd, pathname, pathname_2);

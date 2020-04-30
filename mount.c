@@ -1,14 +1,5 @@
 /*********** mount.c file ****************/
 
-int mount_init()
-{   
-    // set all file systems to free
-    for(int i = 0; i < MT_SIZE; i++)
-    {
-        mtable[i].dev = 0;
-    }
-}
-
 int mount(char *pathname, char *mp)
 {
 
